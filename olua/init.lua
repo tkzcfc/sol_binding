@@ -1,0 +1,229 @@
+local scrpath = select(2, ...)
+local osn = package.cpath:find("?.dll") and "windows" or
+    ((io.popen("uname"):read("*l"):find("Darwin")) and "macos" or "linux")
+
+local function isdir(path)
+    if not string.find(path, "[/\\]$") then
+        path = path .. "/"
+    end
+    local ok, err, code = os.rename(path, path)
+    if not ok then
+        if code == 13 then
+            return true
+        end
+    end
+    return ok, err
+end
+
+local function mkdir(dir)
+    if not isdir(dir) then
+        if osn == "windows" then
+            os.execute("mkdir " .. dir:gsub("/", "\\"))
+        else
+            os.execute("mkdir -p " .. dir)
+        end
+    end
+end
+
+-- working directory
+OLUA_WORKDIR = nil
+if osn == "windows" then
+    OLUA_WORKDIR = io.popen("cd"):read("*l")
+    OLUA_WORKDIR = OLUA_WORKDIR:gsub("\\", "/")
+else
+    OLUA_WORKDIR = io.popen("pwd"):read("*l")
+end
+
+-- home dir
+---@type string?
+OLUA_HOME = nil
+if osn == "windows" then
+    OLUA_HOME = os.getenv("USERPROFILE")
+    if not OLUA_HOME then
+        OLUA_HOME = os.getenv("TMP"):gsub("\\", "/")
+        if OLUA_HOME:find("^C:/Users/") then
+            OLUA_HOME = OLUA_HOME:match("^C:/Users/[^/]+")
+        end
+    end
+    OLUA_HOME = OLUA_HOME .. "/.olua"
+else
+    OLUA_HOME = os.getenv("HOME") .. "/.olua"
+end
+
+-- version
+OLUA_VERSION = "v1.5"
+OLUA_HOME = OLUA_HOME .. "/" .. OLUA_VERSION
+
+-- lua search path
+package.path = scrpath:gsub("[^/.\\]+%.lua$", "?.lua;") .. package.path
+
+-- lua c search path
+local suffix = osn == "windows" and "dll" or "so"
+local lua = "lua" .. string.match(_VERSION, "%d.%d"):gsub("%.", "")
+local arch
+if osn == "windows" then
+    arch = os.getenv("PROCESSOR_ARCHITECTURE")
+    if arch == "x86" then
+        arch = "x86/"
+    elseif arch == "AMD64" then
+        arch = "x64/"
+    else
+        error("unsupported architecture: " .. arch)
+    end
+else
+    arch = ""
+end
+local cpath = string.format("%s/%s/%s?.%s", OLUA_HOME, lua, arch, suffix)
+package.cpath = cpath .. ";" .. package.cpath
+
+print(string.format("pwd: %s", OLUA_WORKDIR))
+print(string.format("olua home: %s", OLUA_HOME))
+print(string.format("lua cpath: %s", cpath))
+
+-- unzip lib and header
+if not isdir(OLUA_HOME) or not isdir(OLUA_HOME .. "/" .. lua) or not isdir(OLUA_HOME .. "/include") then
+    local dir = scrpath:gsub("[^/.\\]+%.lua$", "bin")
+    mkdir(OLUA_HOME)
+
+    local function unzip(path)
+        local exe = osn == "windows" and ".exe" or ""
+        local cmd = "%s/unzip-%s%s -f %s -o %s"
+        cmd = cmd:format(dir, osn, exe, path, OLUA_HOME)
+        if osn == "windows" then
+            cmd = cmd:gsub("/", "\\")
+        end
+        os.execute(cmd)
+    end
+
+    local function wget(url, path)
+        print(string.format("download: %s", url))
+        local exe = osn == "windows" and ".exe" or ""
+        local cmd = "%s/wget-%s%s -l %s -o %s"
+        cmd = cmd:format(dir, osn, exe, "%s", path)
+        if osn == "windows" then
+            cmd = cmd:gsub("/", "\\")
+        end
+        cmd = cmd:format(url)
+        os.execute(cmd)
+    end
+
+    local url = "https://github.com/zhongfq/olua/releases/download/" .. OLUA_VERSION
+    local deps = { "include.zip", ("%s-%s.zip"):format(lua, osn) }
+    for _, v in ipairs(deps) do
+        wget(url .. "/" .. v, dir .. "/" .. v)
+    end
+    for _, v in ipairs(deps) do
+        unzip(dir .. "/" .. v)
+    end
+end
+
+
+
+
+
+
+
+function string.split(input, delimiter)
+    input = tostring(input)
+    delimiter = tostring(delimiter)
+    if (delimiter=='') then return false end
+    local pos,arr = 0, {}
+    -- for each divider found
+    for st,sp in function() return string.find(input, delimiter, pos, true) end do
+        table.insert(arr, string.sub(input, pos, st - 1))
+        pos = sp + 1
+    end
+    table.insert(arr, string.sub(input, pos))
+    return arr
+end
+
+function string.trim(input)
+    input = string.gsub(input, "^[ \t\n\r]+", "")
+    return string.gsub(input, "[ \t\n\r]+$", "")
+end
+
+local function dump_value_(v)
+    if type(v) == "string" then
+        v = "\"" .. v .. "\""
+    end
+    return tostring(v)
+end
+
+function dump(value, description, nesting)
+    if type(nesting) ~= "number" then nesting = 3 end
+
+    local lookupTable = {}
+    local result = {}
+
+    local traceback = string.split(debug.traceback("", 2), "\n")
+    print("dump from: " .. string.trim(traceback[3]))
+
+    local function dump_(value, description, indent, nest, keylen)
+        description = description or "<var>"
+        local spc = ""
+        if type(keylen) == "number" then
+            spc = string.rep(" ", keylen - string.len(dump_value_(description)))
+        end
+        if type(value) ~= "table" then
+            result[#result +1 ] = string.format("%s%s%s = %s", indent, dump_value_(description), spc, dump_value_(value))
+        elseif lookupTable[tostring(value)] then
+            result[#result +1 ] = string.format("%s%s%s = *REF*", indent, dump_value_(description), spc)
+        else
+            lookupTable[tostring(value)] = true
+            if nest > nesting then
+                result[#result +1 ] = string.format("%s%s = *MAX NESTING*", indent, dump_value_(description))
+            else
+                result[#result +1 ] = string.format("%s%s = {", indent, dump_value_(description))
+                local indent2 = indent.."    "
+                local keys = {}
+                local keylen = 0
+                local values = {}
+                for k, v in pairs(value) do
+                    keys[#keys + 1] = k
+                    local vk = dump_value_(k)
+                    local vkl = string.len(vk)
+                    if vkl > keylen then keylen = vkl end
+                    values[k] = v
+                end
+                table.sort(keys, function(a, b)
+                    if type(a) == "number" and type(b) == "number" then
+                        return a < b
+                    else
+                        return tostring(a) < tostring(b)
+                    end
+                end)
+                for i, k in ipairs(keys) do
+                    dump_(values[k], k, indent2, nest + 1, keylen)
+                end
+                result[#result +1] = string.format("%s}", indent)
+            end
+        end
+    end
+    dump_(value, description, "- ", 1)
+
+    for i, line in ipairs(result) do
+        print(line)
+    end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+require "script.olua"
+require "script.export"
+require "script.basictype"
+require "script.gen-class"
+require "script.gen-func"
+require "script.gen-callback"
+require "script.gen-annotation"
+require "script.gen-sol"
+require "script.idl"
+require "script.autoconf"
