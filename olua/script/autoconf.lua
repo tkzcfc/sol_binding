@@ -2385,7 +2385,7 @@ local function write_typedefs()
                 packvars = packvars,
                 from_string = cls.options.from_string,
                 from_table = cls.options.from_table,
-                ignore_self_type = cls.options.from_table,
+                ignore_self_type = cls.options.ignore_self_type,
                 default = cls.conf.default,
             }
             typdefs:push(typedef)
