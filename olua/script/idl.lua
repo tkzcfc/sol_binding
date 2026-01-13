@@ -769,6 +769,13 @@ function typeconf(cxxcls)
         cls.options.ignore_self_type = checkboolean("ignore_self_type", ignore_self_type)
         return CMD
     end
+    
+    ---Can construct a c++ class from table.
+    ---@param is_not_extend_object booltype
+    function CMD.is_not_extend_object(is_not_extend_object)
+        cls.options.is_not_extend_object = checkboolean("is_not_extend_object", is_not_extend_object)
+        return CMD
+    end
 
     ---Extend a c++ class with another class, all static members of `extcls`
     ---will be copied into the current class.

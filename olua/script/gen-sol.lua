@@ -3,13 +3,22 @@ local symbols = {}
 
 ---@alias idl.gen.writer fun(str:string|nil)
 
+---@param module idl.gen.module_desc
+local function has_packable_or_fromtable_class(module)
+    for _, cls in ipairs(module.class_types) do
+        if cls.options.packable or cls.options.from_table then
+            return true
+        end
+    end
+    return false
+end
 
 ---@param module idl.gen.module_desc
 ---@param cls idl.gen.class_desc
 ---@param write idl.gen.writer
 local function gen_class_open(module, cls, write, register_class_arr)
-    local oluacls_class
-    
+
+
     local typename = cls.cxxcls:match("::([%w_]+)$")
 
     local lines = {}
@@ -44,7 +53,11 @@ local function gen_class_open(module, cls, write, register_class_arr)
                 params = ", " .. params
             end
 
-            lines[#lines + 1] = olua.format([[LUA_METHOD_${args_num}(${typename}, ${func.cxxfn}${params})]])
+            if cls.options.is_not_extend_object then
+                lines[#lines + 1] = olua.format([["${func.cxxfn}", &${cls.cxxcls}::${func.cxxfn}]])
+            else
+                lines[#lines + 1] = olua.format([[LUA_METHOD_${args_num}(${cls.cxxcls}, ${func.cxxfn}${params})]])
+            end
         end
     end
 
@@ -60,7 +73,11 @@ local function gen_class_open(module, cls, write, register_class_arr)
         -- print(vi.get.prototype)
         -- print(ret_type)
 
-        lines[#lines + 1] = olua.format([[LUA_PROPERTY_GET_SET(${typename}, ${var_name}, ${ret_type})]])
+        if cls.options.is_not_extend_object then
+            lines[#lines + 1] = olua.format([["${var_name}", &${cls.cxxcls}::${var_name}]])
+        else
+            lines[#lines + 1] = olua.format([[LUA_PROPERTY_GET_SET(${cls.cxxcls}, ${var_name}, ${ret_type})]])
+        end
     end
 
 
@@ -74,15 +91,20 @@ local function gen_class_open(module, cls, write, register_class_arr)
     local code = table.concat(lines, ",\n")
 
 
+    local headers = ""
+    if not has_packable_or_fromtable_class(module) then
+        headers = module.headers
+    end
+
     write(olua.format([[
+    #include "af/tolua/tolua_common.h"
+    ${headers}
     void register_${cls.luacls#}_tolua(sol::table& lua)
     {
         // clang-format off
-        
         lua.new_usertype<${cls.cxxcls}>(
 ${code}
-        )
-
+        );
         // clang-format on
     }
     ]]))
@@ -91,15 +113,6 @@ ${code}
 end
 
 
----@param module idl.gen.module_desc
-local function has_packable_or_fromtable_class(module)
-    for _, cls in ipairs(module.class_types) do
-        if cls.options.packable or cls.options.from_table then
-            return true
-        end
-    end
-    return false
-end
 
 ---@param module idl.gen.module_desc
 local function gen_header(module)
@@ -122,7 +135,7 @@ local function gen_header(module)
         // AUTO GENERATED, DO NOT MODIFY!
         //
         #pragma once
-        #include "tolua_common.h"
+        #include "af/tolua/tolua_common.h"
 
         void register_auto_module_${module.name}_tolua(sol::table& lua);
     ]]))
@@ -154,9 +167,11 @@ local function gen_classes(module, register_class_arr)
             write(macro and "#endif" or nil)
             write("")
 
-            local path = olua.format("${module.output_dir}/${cls.luacls#}_tolua.cpp")
-            path = path:gsub("(%u)", function(c) return "_" .. c:lower() end):gsub("^_", "")
-            path = path:gsub("__", "_")
+            local cpp_name = olua.format("${cls.luacls#}_tolua.cpp")
+            cpp_name = cpp_name:gsub("(%u)", function(c) return "_" .. c:lower() end):gsub("^_", "")
+            cpp_name = cpp_name:gsub("__", "_")
+
+            local path = olua.format("${module.output_dir}/${cpp_name}")
             olua.write(path, tostring(arr))
         end
     end
@@ -165,16 +180,11 @@ end
 ---@param module idl.gen.module_desc
 ---@param write idl.gen.writer
 local function gen_include(module, write)
-    local headers = ""
-    if not has_packable_or_fromtable_class(module) then
-        headers = module.headers
-    end
     write(olua.format([[
         //
         // AUTO GENERATED, DO NOT MODIFY!
         //
-        #include "lua_${module.name}.h"
-        ${headers}
+        #include "${module.name}_tolua.h"
     ]]))
     write("")
 

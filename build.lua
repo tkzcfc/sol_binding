@@ -18,7 +18,7 @@ clang {
 -------------------------------------------------------------------------------
 module 'af'
 
-output_dir 'src'
+output_dir 'D:/work/AxmolFighter/client/Source/af/tolua/auto'
 
 api_dir 'autobuild/addons/af'
 
@@ -28,8 +28,8 @@ headers [[
 #include "af/ecs/Entity.h"
 #include "af/ecs/System.h"
 #include "af/GameWord.h"
-#include "af/component/GameMapComponent.h"
-#include "af/component/GameMapRenderComponent.h"
+#include "af/Components.h"
+#include "af/Systems.h"
 ]]
 
 local pattern = {
@@ -64,8 +64,27 @@ typeconf 'af::GameWord'
 typeconf 'af::Signature'
     .ignore_self_type 'true'
 
-typeconf 'af::LayerGroup'
-typeconf 'af::MapInfo'
-typeconf 'af::MapScope'
+
+typeconf 'af::IdentityComponent'
+typeconf 'af::TransformComponent'
+typeconf 'af::ObstacleComponent'
+typeconf 'af::SoundComponent'
+typeconf 'af::StatesComponent'
+
 typeconf 'af::MapTile'
+    .is_not_extend_object 'true'
+typeconf 'af::LayerGroup'
+    .is_not_extend_object 'true'
+typeconf 'af::MapScope'
+    .is_not_extend_object 'true'
+typeconf 'af::MapInfo'
+    .is_not_extend_object 'true'
 typeconf 'af::GameMapComponent'
+
+typeconf 'af::GameMapRenderComponent'
+
+
+
+typeconf 'af::GameMapRenderSystem'
+typeconf 'af::GameMapSystem'
+typeconf 'af::ObstacleSystem'
