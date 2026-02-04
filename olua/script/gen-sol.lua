@@ -13,6 +13,27 @@ local function has_packable_or_fromtable_class(module)
     return false
 end
 
+local function string_ltrim(input)
+    local lines = {}
+
+    local split_lines = string.split(input, "\n")
+    for i, line in ipairs(split_lines) do
+        if i == #split_lines and line == "" then
+        else
+            if i == 1 then
+                line = string.gsub(line, "^%s%s%s%s", "")
+                table.insert(lines, line)
+            else
+                -- 其他行增加4个空格
+                table.insert(lines, "    " .. line)
+            end
+        end
+    end
+
+    local result = table.concat(lines, "\n")
+    return result
+end
+
 ---@param module idl.gen.module_desc
 ---@param cls idl.gen.class_desc
 ---@param write idl.gen.writer
@@ -22,7 +43,13 @@ local function gen_class_open(module, cls, write, register_class_arr)
     local typename = cls.cxxcls:match("::([%w_]+)$")
 
     local lines = {}
-    lines[#lines + 1] = olua.format([["${typename}", sol::no_constructor]])
+    if type(cls.options.custom_sol_constructor) == "table" then
+        for k, v in pairs(cls.options.custom_sol_constructor) do
+            lines[#lines + 1] = string_ltrim(v)
+        end
+    else
+        lines[#lines + 1] = olua.format([["${typename}", sol::no_constructor]])
+    end
 
     if not cls.options.reg_luatype then
     elseif cls.supercls then
@@ -80,9 +107,11 @@ local function gen_class_open(module, cls, write, register_class_arr)
         end
     end
 
-
-
-
+    if type(cls.options.custom_sol_function) == "table" then
+        for k, v in pairs(cls.options.custom_sol_function) do
+            lines[#lines + 1] = string_ltrim(v)
+        end
+    end
 
 
     for k, v in pairs(lines) do
@@ -97,8 +126,11 @@ local function gen_class_open(module, cls, write, register_class_arr)
     end
 
     write(olua.format([[
-    #include "af/tolua/tolua_common.h"
+    #include "mugen/tolua/tolua_common.h"
     ${headers}
+
+NS_MG_BEGIN
+
     void register_${cls.luacls#}_tolua(sol::table& lua)
     {
         // clang-format off
@@ -107,6 +139,8 @@ ${code}
         );
         // clang-format on
     }
+
+NS_MG_END
     ]]))
 
     table.insert(register_class_arr, olua.format([[${cls.luacls#}]]))
@@ -135,9 +169,13 @@ local function gen_header(module)
         // AUTO GENERATED, DO NOT MODIFY!
         //
         #pragma once
-        #include "af/tolua/tolua_common.h"
+        #include "mugen/tolua/tolua_common.h"
+
+        NS_MG_BEGIN
 
         void register_auto_module_${module.name}_tolua(sol::table& lua);
+        
+        NS_MG_END
     ]]))
     write("")
 
@@ -185,12 +223,13 @@ local function gen_include(module, write)
         // AUTO GENERATED, DO NOT MODIFY!
         //
         #include "${module.name}_tolua.h"
+
+        NS_MG_BEGIN
     ]]))
     write("")
 
     if module.codeblock and #module.codeblock > 0 then
         write(olua.format(module.codeblock))
-        write("")
     end
 end
 
@@ -212,6 +251,8 @@ void register_auto_module_${module.name}_tolua(sol::table& lua)
     end
 
     write("}")
+    write("")
+    write("NS_MG_END")
 end
 
 ---@param module idl.gen.module_desc

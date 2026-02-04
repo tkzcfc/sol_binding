@@ -777,6 +777,22 @@ function typeconf(cxxcls)
         return CMD
     end
 
+    function CMD.custom_sol_constructor(custom_sol_constructor)
+        if type(custom_sol_constructor) ~= "table" then
+            custom_sol_constructor = nil
+        end
+        cls.options.custom_sol_constructor = custom_sol_constructor
+        return CMD
+    end
+
+    function CMD.custom_sol_function(custom_sol_function)
+        if type(custom_sol_function) ~= "table" then
+            custom_sol_function = nil
+        end
+        cls.options.custom_sol_function = custom_sol_function
+        return CMD
+    end
+
     ---Extend a c++ class with another class, all static members of `extcls`
     ---will be copied into the current class.
     ---@param extcls string

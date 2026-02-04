@@ -2387,6 +2387,8 @@ local function write_typedefs()
                 from_table = cls.options.from_table,
                 ignore_self_type = cls.options.ignore_self_type,
                 is_not_extend_object = cls.options.is_not_extend_object,
+                custom_sol_constructor = cls.options.custom_sol_constructor,
+                custom_sol_function = cls.options.custom_sol_function,
                 default = cls.conf.default,
             }
             typdefs:push(typedef)
