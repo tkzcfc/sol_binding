@@ -1,5 +1,7 @@
 require "olua"
 
+inspect = require('inspect')
+
 local ROOT_SOURCE_DIR = 'D:/work/AxmolFighter/client/Source'
 
 -------------------------------------------------------------------------------
@@ -121,6 +123,7 @@ headers [[
 #include "mugen/GameWord.h"
 #include "mugen/Components.h"
 #include "mugen/Systems.h"
+#include "mugen/conf/Config.h"
 ]]
 
 local pattern = {
@@ -170,7 +173,6 @@ typeconf 'mugen::GameWord'
     .ignore_self_type 'true'
 typeconf 'mugen::Signature'
     .ignore_self_type 'true'
-
 
 typeconf 'mugen::IdentityComponent'
 typeconf 'mugen::TransformComponent'
@@ -285,3 +287,23 @@ typeconf 'mugen::GameMapSystem'
 typeconf 'mugen::ObstacleSystem'
     .exclude "onEntityAdded"
     .exclude "onEntityRemoved"
+
+-- math
+typeconf 'mugen::Vector2f'
+typeconf 'mugen::Vector2i'
+typeconf 'mugen::Vector3f'
+typeconf 'mugen::Vector3i'
+typeconf 'mugen::DamageBox'
+
+-- GameDef enums
+typeconf 'mugen::JobType'
+typeconf 'mugen::AtkType'
+typeconf 'mugen::ElementalProperty'
+
+-- Config
+typeconf 'mugen::Frame'
+typeconf 'mugen::AniConfig'
+typeconf 'mugen::AtkConfig'
+typeconf 'mugen::CharacterConfig'
+typeconf 'mugen::EquConfig'
+typeconf 'mugen::Config'
