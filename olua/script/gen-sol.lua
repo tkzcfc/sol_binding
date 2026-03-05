@@ -38,9 +38,50 @@ end
 ---@param cls idl.gen.class_desc
 ---@param write idl.gen.writer
 local function gen_class_open(module, cls, write, register_class_arr)
-
-
     local typename = cls.cxxcls:match("::([%w_]+)$")
+
+    -- if typename == "JobType" then
+    --     print("xxxxxxxxxx", olua.is_enum_type(cls))
+    --     print(inspect(cls, {newline='\n', indent="    "}))
+    --     error("xx")
+    -- end
+    if olua.is_enum_type(cls) then
+        local headers = ""
+        if not has_packable_or_fromtable_class(module) then
+            headers = module.headers
+        end
+
+        local lines = {}
+        for _, v in pairs(cls.enums) do
+            table.insert(lines, olua.format([["${v.name}", ${v.value}]]))
+        end
+        for k, v in pairs(lines) do
+            lines[k] = "        " .. v
+        end
+        local code = table.concat(lines, ",\n")
+
+        write(olua.format([[
+#include "mugen/tolua/tolua_common.h"
+${headers}
+
+NS_MG_BEGIN
+
+void register_${cls.luacls#}_tolua(sol::table& lua)
+{
+    // clang-format off
+    lua.new_enum("${typename}",
+${code}
+    );
+    // clang-format on
+}
+
+NS_MG_END
+        ]]))
+
+        table.insert(register_class_arr, olua.format([[${cls.luacls#}]]))
+        return
+    end
+
 
     local lines = {}
     if type(cls.options.custom_sol_constructor) == "table" then
@@ -100,7 +141,7 @@ local function gen_class_open(module, cls, write, register_class_arr)
         -- print(vi.get.prototype)
         -- print(ret_type)
 
-        if cls.options.is_not_extend_object then
+        if ret_type == nil or cls.options.is_not_extend_object then
             lines[#lines + 1] = olua.format([["${var_name}", &${cls.cxxcls}::${var_name}]])
         else
             lines[#lines + 1] = olua.format([[LUA_PROPERTY_GET_SET(${cls.cxxcls}, ${var_name}, ${ret_type})]])
