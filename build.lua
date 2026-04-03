@@ -127,13 +127,6 @@ output_dir(ROOT_SOURCE_DIR .. '/mugen/tolua/auto')
 api_dir 'autobuild/addons/mugen'
 
 headers [[
-#include "mugen/core/ecs/Component.h"
-#include "mugen/core/ecs/ECSManager.h"
-#include "mugen/core/ecs/Entity.h"
-#include "mugen/core/ecs/System.h"
-#include "mugen/GameWord.h"
-#include "mugen/Components.h"
-#include "mugen/Systems.h"
 #include "mugen/conf/Config.h"
 ]]
 
@@ -172,67 +165,67 @@ typeconf 'mugen::Object'
     .exclude "deserialize"
     .exclude "copySpecialProperties"
 
-typeconf 'mugen::Component'
-    .ignore_self_type 'true'
-typeconf 'mugen::ECSManager'
-    .ignore_self_type 'true'
-typeconf 'mugen::Entity'
-    .ignore_self_type 'true'
-typeconf 'mugen::System'
-    .ignore_self_type 'true'
-typeconf 'mugen::GameWord'
-    .ignore_self_type 'true'
-typeconf 'mugen::Signature'
-    .ignore_self_type 'true'
+-- typeconf 'mugen::Component'
+--     .ignore_self_type 'true'
+-- typeconf 'mugen::ECSManager'
+--     .ignore_self_type 'true'
+-- typeconf 'mugen::Entity'
+--     .ignore_self_type 'true'
+-- typeconf 'mugen::System'
+--     .ignore_self_type 'true'
+-- typeconf 'mugen::GameWord'
+--     .ignore_self_type 'true'
+-- typeconf 'mugen::Signature'
+--     .ignore_self_type 'true'
 
-typeconf 'mugen::PartData'
-    -- .custom_sol_constructor {
-    --     '"PartData", sol::constructors<mugen::PartData()>()'
-    -- }
-typeconf 'mugen::AvatarComponent'
-    .exclude "equipments"
-    .custom_sol_function {
-[[
-    "equipment_count", [](const AvatarComponent& self) {
-        return self.equipments.size();
-    },
-    "get_equipment", [](AvatarComponent& self, int index) -> PartData* {
-        if (index >= 1 && index <= static_cast<int>(self.equipments.size())) {
-            return &self.equipments[index - 1];
-        }
-        return nullptr;
-    }
-]]}
+-- typeconf 'mugen::PartData'
+--     -- .custom_sol_constructor {
+--     --     '"PartData", sol::constructors<mugen::PartData()>()'
+--     -- }
+-- typeconf 'mugen::AvatarComponent'
+--     .exclude "equipments"
+--     .custom_sol_function {
+-- [[
+--     "equipment_count", [](const AvatarComponent& self) {
+--         return self.equipments.size();
+--     },
+--     "get_equipment", [](AvatarComponent& self, int index) -> PartData* {
+--         if (index >= 1 && index <= static_cast<int>(self.equipments.size())) {
+--             return &self.equipments[index - 1];
+--         }
+--         return nullptr;
+--     }
+-- ]]}
 
-typeconf 'mugen::AvatarRenderComponent'
-typeconf 'mugen::DirectorComponent'
-typeconf 'mugen::GameMapComponent'
-typeconf 'mugen::GameMapRenderComponent'
-typeconf 'mugen::IdentityComponent'
-typeconf 'mugen::InputComponent'
-typeconf 'mugen::ObstacleComponent'
-typeconf 'mugen::SoundComponent'
+-- typeconf 'mugen::AvatarRenderComponent'
+-- typeconf 'mugen::DirectorComponent'
+-- typeconf 'mugen::GameMapComponent'
+-- typeconf 'mugen::GameMapRenderComponent'
+-- typeconf 'mugen::IdentityComponent'
+-- typeconf 'mugen::InputComponent'
+-- typeconf 'mugen::ObstacleComponent'
+-- typeconf 'mugen::SoundComponent'
 
-typeconf 'mugen::FSM'
-typeconf 'mugen::State'
-typeconf 'mugen::Translation'
-typeconf 'mugen::StatesMachineComponent'
+-- typeconf 'mugen::FSM'
+-- typeconf 'mugen::State'
+-- typeconf 'mugen::Translation'
+-- typeconf 'mugen::StatesMachineComponent'
 
-typeconf 'mugen::TransformComponent'
+-- typeconf 'mugen::TransformComponent'
 
 
-typeconf 'mugen::GameMapRenderSystem'
-    .exclude "onEntityAdded"
-    .exclude "onEntityRemoved"
-typeconf 'mugen::GameMapSystem'
-    .exclude "onEntityAdded"
-    .exclude "onEntityRemoved"
-typeconf 'mugen::ObstacleSystem'
-    .exclude "onEntityAdded"
-    .exclude "onEntityRemoved"
-typeconf 'mugen::AvatarRenderSystem'
-    .exclude "onEntityAdded"
-    .exclude "onEntityRemoved"
+-- typeconf 'mugen::GameMapRenderSystem'
+--     .exclude "onEntityAdded"
+--     .exclude "onEntityRemoved"
+-- typeconf 'mugen::GameMapSystem'
+--     .exclude "onEntityAdded"
+--     .exclude "onEntityRemoved"
+-- typeconf 'mugen::ObstacleSystem'
+--     .exclude "onEntityAdded"
+--     .exclude "onEntityRemoved"
+-- typeconf 'mugen::AvatarRenderSystem'
+--     .exclude "onEntityAdded"
+--     .exclude "onEntityRemoved"
 
 -- math
 typeconf 'mugen::Vector2f'
