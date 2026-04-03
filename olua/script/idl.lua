@@ -784,6 +784,14 @@ function typeconf(cxxcls)
         cls.options.custom_sol_constructor = custom_sol_constructor
         return CMD
     end
+    
+    function CMD.custom_code(custom_code)
+        if type(custom_code) ~= "table" then
+            custom_code = nil
+        end
+        cls.options.custom_code = custom_code
+        return CMD
+    end
 
     function CMD.custom_sol_function(custom_sol_function)
         if type(custom_sol_function) ~= "table" then

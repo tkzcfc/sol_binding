@@ -2389,6 +2389,7 @@ local function write_typedefs()
                 is_not_extend_object = cls.options.is_not_extend_object,
                 custom_sol_constructor = cls.options.custom_sol_constructor,
                 custom_sol_function = cls.options.custom_sol_function,
+                custom_code = cls.options.custom_code,
                 default = cls.conf.default,
             }
             typdefs:push(typedef)

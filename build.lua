@@ -47,7 +47,7 @@ local function listDirectory(path, options)
     return files
 end
 
-local function autoGenerateMacroDefinitionFile(dir_name, out_file_name, macro_name)
+local function autoGenerateMacroDefinitionFile(dir_name, out_file_name, macro_name, ignore_names)
     local root_dir = ROOT_SOURCE_DIR .. "/mugen"
     local search_dir = root_dir .. "/" .. dir_name
     local items = listDirectory(search_dir, {
@@ -60,7 +60,17 @@ local function autoGenerateMacroDefinitionFile(dir_name, out_file_name, macro_na
     for _, item in ipairs(items) do
         if not item.is_dir and string.sub(item.name, -2) == ".h" then
             local type_name = string.sub(item.name, 1, -3)
-            table.insert(types, type_name)
+
+            local ignore = false
+            for k, v in pairs(ignore_names or {}) do
+                if v == type_name then
+                    ignore = true
+                    break
+                end
+            end
+            if not ignore then
+                    table.insert(types, type_name)
+            end
         end
     end
 
@@ -86,7 +96,8 @@ end
 if is_windows then
     autoGenerateMacroDefinitionFile("component", "Components.h", "COMPONENT_LIST")
     autoGenerateMacroDefinitionFile("system", "Systems.h", "SYSTEM_LIST")
-    autoGenerateMacroDefinitionFile("states", "States.h", "STATE_LIST")
+    autoGenerateMacroDefinitionFile("states", "States.h", "STATE_LIST", {"SkillState"})
+    autoGenerateMacroDefinitionFile("translations", "Translations.h", "TRANSLATION_LIST")
 end
 
 
@@ -174,108 +185,40 @@ typeconf 'mugen::GameWord'
 typeconf 'mugen::Signature'
     .ignore_self_type 'true'
 
+typeconf 'mugen::PartData'
+    -- .custom_sol_constructor {
+    --     '"PartData", sol::constructors<mugen::PartData()>()'
+    -- }
+typeconf 'mugen::AvatarComponent'
+    .exclude "equipments"
+    .custom_sol_function {
+[[
+    "equipment_count", [](const AvatarComponent& self) {
+        return self.equipments.size();
+    },
+    "get_equipment", [](AvatarComponent& self, int index) -> PartData* {
+        if (index >= 1 && index <= static_cast<int>(self.equipments.size())) {
+            return &self.equipments[index - 1];
+        }
+        return nullptr;
+    }
+]]}
+
+typeconf 'mugen::AvatarRenderComponent'
+typeconf 'mugen::DirectorComponent'
+typeconf 'mugen::GameMapComponent'
+typeconf 'mugen::GameMapRenderComponent'
 typeconf 'mugen::IdentityComponent'
-typeconf 'mugen::TransformComponent'
+typeconf 'mugen::InputComponent'
 typeconf 'mugen::ObstacleComponent'
 typeconf 'mugen::SoundComponent'
-typeconf 'mugen::StatesComponent'
 
-typeconf 'mugen::MapTile'
-    .is_not_extend_object 'true'
-    .custom_sol_function {
-[[
-    "from_table", [](const sol::table& tbl) {
-        mugen::MapTile t;
-        t.url = tbl["url"].get_or(std::string{});
-        t.sx = tbl["sx"].get_or(1.0f);
-        t.sy = tbl["sy"].get_or(1.0f);
-        t.ax = tbl["ax"].get_or(0.0f);
-        t.ay = tbl["ay"].get_or(0.0f);
-        t.x = static_cast<int>(tbl["x"].get_or(0.0));
-        t.y = static_cast<int>(tbl["y"].get_or(0.0));
-        t.w = static_cast<int>(tbl["w"].get_or(0.0));
-        t.h = static_cast<int>(tbl["h"].get_or(0.0));
-        return t;
-    }
-]]
-    }
+typeconf 'mugen::FSM'
+typeconf 'mugen::State'
+typeconf 'mugen::Translation'
+typeconf 'mugen::StatesMachineComponent'
 
-
-typeconf 'mugen::LayerGroup'
-    .is_not_extend_object 'true'
-    .custom_sol_function {
-[[
-    "from_table", [](const sol::table& tbl) {
-        mugen::LayerGroup group;
-        auto fill = [](std::vector<mugen::MapTile>& vec, const sol::object& obj) {
-            if (obj.is<sol::table>()) {
-                for (auto& pair : obj.as<sol::table>()) {
-                    if (pair.second.is<sol::table>()) {
-                        const sol::table& t = pair.second.as<sol::table>();
-                        mugen::MapTile tile;
-                        tile.url = t["url"].get_or(std::string{});
-                        tile.sx = t["sx"].get_or(1.0f);
-                        tile.sy = t["sy"].get_or(1.0f);
-                        tile.ax = t["ax"].get_or(0.0f);
-                        tile.ay = t["ay"].get_or(0.0f);
-                        tile.x = static_cast<int>(t["x"].get_or(0.0));
-                        tile.y = static_cast<int>(t["y"].get_or(0.0));
-                        tile.w = static_cast<int>(t["w"].get_or(0.0));
-                        tile.h = static_cast<int>(t["h"].get_or(0.0));
-                        vec.push_back(tile);
-                    }
-                }
-            }
-        };
-        fill(group.farGroup, tbl["farGroup"]);
-        fill(group.nearGroup, tbl["nearGroup"]);
-        fill(group.floorGroup, tbl["floorGroup"]);
-        fill(group.objectGroup, tbl["objectGroup"]);
-        fill(group.effectGroup, tbl["effectGroup"]);
-        return group;
-    }
-]]
-    }
-
-
-typeconf 'mugen::MapScope'
-    .is_not_extend_object 'true'
-    .custom_sol_function {
-[[
-    "from_table", [](const sol::table& tbl) {
-        mugen::MapScope t;
-        t.w = static_cast<int>(tbl["w"].get_or(0.0));
-        t.h = static_cast<int>(tbl["h"].get_or(0.0));
-        t.x = static_cast<int>(tbl["x"].get_or(0.0));
-        t.y = static_cast<int>(tbl["y"].get_or(0.0));
-        return t;
-    }
-]]
-    }
-
-typeconf 'mugen::MapInfo'
-    .is_not_extend_object 'true'
-    .custom_sol_function {
-[[
-    "from_table", [](const sol::table& tbl) {
-        mugen::MapInfo t;
-        t.bgm = tbl["bgm"].get_or(std::string{});
-        t.name = tbl["name"].get_or(std::string{});
-        t.theme = tbl["theme"].get_or(std::string{});
-        t.isTown = tbl["isTown"].get_or(false);
-        t.width = static_cast<int>(tbl["width"].get_or(0.0));
-        t.height = static_cast<int>(tbl["height"].get_or(0.0));
-        t.horizon = tbl["horizon"].get_or(0);
-        return t;
-    }
-]]
-    }
-
-
-typeconf 'mugen::GameMapComponent'
-
-typeconf 'mugen::GameMapRenderComponent'
-
+typeconf 'mugen::TransformComponent'
 
 
 typeconf 'mugen::GameMapRenderSystem'
@@ -287,23 +230,203 @@ typeconf 'mugen::GameMapSystem'
 typeconf 'mugen::ObstacleSystem'
     .exclude "onEntityAdded"
     .exclude "onEntityRemoved"
+typeconf 'mugen::AvatarRenderSystem'
+    .exclude "onEntityAdded"
+    .exclude "onEntityRemoved"
 
 -- math
 typeconf 'mugen::Vector2f'
+    .custom_sol_constructor {
+        '"Vector2f", sol::constructors<mugen::Vector2f()>()'
+    }
 typeconf 'mugen::Vector2i'
+    .custom_sol_constructor {
+        '"Vector2i", sol::constructors<mugen::Vector2i()>()'
+    }
 typeconf 'mugen::Vector3f'
+    .custom_sol_constructor {
+        '"Vector3f", sol::constructors<mugen::Vector3f()>()'
+    }
 typeconf 'mugen::Vector3i'
+    .custom_sol_constructor {
+        '"Vector3i", sol::constructors<mugen::Vector3i()>()'
+    }
 typeconf 'mugen::DamageBox'
+    .custom_sol_constructor {
+        '"DamageBox", sol::constructors<mugen::DamageBox()>()'
+    }
 
 -- GameDef enums
 typeconf 'mugen::JobType'
 typeconf 'mugen::AtkType'
 typeconf 'mugen::ElementalProperty'
+typeconf 'mugen::EquipmentType'
+typeconf 'mugen::EquipmentSubType'
+typeconf 'mugen::EquipmentRarityType'
 
 -- Config
 typeconf 'mugen::Frame'
+    .custom_sol_constructor {
+        '"Frame", sol::constructors<mugen::Frame()>()'
+    }
+
 typeconf 'mugen::AniConfig'
+    .custom_sol_constructor {
+        '"AniConfig", sol::constructors<mugen::AniConfig()>()'
+    }
+
 typeconf 'mugen::AtkConfig'
-typeconf 'mugen::CharacterConfig'
+    .custom_sol_constructor {
+        '"AtkConfig", sol::constructors<mugen::AtkConfig()>()'
+    }
+
+typeconf 'mugen::MotionConfig'
+    .custom_sol_constructor {
+        '"MotionConfig", sol::constructors<mugen::MotionConfig()>()'
+    }
+
+
+typeconf 'mugen::SkillTriggerType'
+typeconf 'mugen::SkillStateDurationType'
+typeconf 'mugen::SkillInterruptType'
+typeconf 'mugen::SkillTriggerConfig'
+    .custom_sol_constructor {
+        '"SkillTriggerConfig", sol::constructors<mugen::SkillTriggerConfig()>()'
+    }
+typeconf 'mugen::SkillStateConfig'
+    .custom_sol_constructor {
+        '"SkillStateConfig", sol::constructors<mugen::SkillStateConfig()>()'
+    }
+typeconf 'mugen::SkillCancelRuleConfig'
+    .custom_sol_constructor {
+        '"SkillCancelRuleConfig", sol::constructors<mugen::SkillCancelRuleConfig()>()'
+    }
+typeconf 'mugen::SkillInterruptRuleConfig'
+    .custom_sol_constructor {
+        '"SkillInterruptRuleConfig", sol::constructors<mugen::SkillInterruptRuleConfig()>()'
+    }
+typeconf 'mugen::SkillHitResponseConfig'
+    .custom_sol_constructor {
+        '"SkillHitResponseConfig", sol::constructors<mugen::SkillHitResponseConfig()>()'
+    }
+typeconf 'mugen::SkillConfig'
+    .custom_sol_constructor {
+        '"SkillConfig", sol::constructors<mugen::SkillConfig()>()'
+    }
+
+typeconf 'mugen::ActorInputTriggerType'
+typeconf 'mugen::ActorBindingTargetType'
+typeconf 'mugen::ActorTransitionConditionType'
+typeconf 'mugen::ActorHitType'
+typeconf 'mugen::ActorStateConfig'
+    .custom_sol_constructor {
+        '"ActorStateConfig", sol::constructors<mugen::ActorStateConfig()>()'
+    }
+typeconf 'mugen::ActorInputConditionConfig'
+    .custom_sol_constructor {
+        '"ActorInputConditionConfig", sol::constructors<mugen::ActorInputConditionConfig()>()'
+    }
+typeconf 'mugen::ActorInputBindingConfig'
+    .custom_sol_constructor {
+        '"ActorInputBindingConfig", sol::constructors<mugen::ActorInputBindingConfig()>()'
+    }
+typeconf 'mugen::ActorTransitionConditionConfig'
+    .custom_sol_constructor {
+        '"ActorTransitionConditionConfig", sol::constructors<mugen::ActorTransitionConditionConfig()>()'
+    }
+typeconf 'mugen::ActorTransitionConfig'
+    .custom_sol_constructor {
+        '"ActorTransitionConfig", sol::constructors<mugen::ActorTransitionConfig()>()'
+    }
+typeconf 'mugen::ActorHitMappingConfig'
+    .custom_sol_constructor {
+        '"ActorHitMappingConfig", sol::constructors<mugen::ActorHitMappingConfig()>()'
+    }
+typeconf 'mugen::ActorSkillRefConfig'
+    .custom_sol_constructor {
+        '"ActorSkillRefConfig", sol::constructors<mugen::ActorSkillRefConfig()>()'
+    }
+typeconf 'mugen::ActorConfig'
+    .custom_sol_constructor {
+        '"ActorConfig", sol::constructors<mugen::ActorConfig()>()'
+    }
+    .exclude 'equipments'
+    .custom_sol_function {
+[[
+    "equipment_count", [](const ActorConfig& self) {
+        return self.equipments.size();
+    },
+    "get_equipment", [](const ActorConfig& self, int index) {
+        if (index >= 1 && index <= static_cast<int>(self.equipments.size())) {
+            return self.equipments[index - 1];
+        }
+        return 0;
+    },
+    "set_equipment", [](ActorConfig& self, int index, int32_t value) {
+        if (index >= 1 && index <= static_cast<int>(self.equipments.size())) {
+            self.equipments[index - 1] = value;
+            return true;
+        }
+        return false;
+    }
+]]}
+
+
+typeconf 'mugen::AniLayConfig'
+    .custom_sol_constructor {
+        '"AniLayConfig", sol::constructors<mugen::AniLayConfig()>()'
+    }
+
+typeconf 'mugen::EquAnimationLayerConfig'
+    .custom_sol_constructor {
+        '"EquAnimationLayerConfig", sol::constructors<mugen::EquAnimationLayerConfig()>()'
+    }
+typeconf 'mugen::EquAnimationConfig'
+    .custom_sol_constructor {
+        '"EquAnimationConfig", sol::constructors<mugen::EquAnimationConfig()>()'
+    }
+
 typeconf 'mugen::EquConfig'
+    .custom_sol_constructor {
+        '"EquConfig", sol::constructors<mugen::EquConfig()>()'
+    }
+
+typeconf 'mugen::MapItem'
+    .custom_sol_constructor {
+        '"MapItem", sol::constructors<mugen::MapItem()>()'
+    }
+typeconf 'mugen::MapLayer'
+    .custom_sol_constructor {
+        '"MapLayer", sol::constructors<mugen::MapLayer()>()'
+    }
+typeconf 'mugen::BackgroundLayer'
+    .custom_sol_constructor {
+        '"BackgroundLayer", sol::constructors<mugen::BackgroundLayer()>()'
+    }
+typeconf 'mugen::MapScope'
+    .custom_sol_constructor {
+        '"MapScope", sol::constructors<mugen::MapScope()>()'
+    }
+typeconf 'mugen::MapActor'
+    .custom_sol_constructor {
+        '"MapActor", sol::constructors<mugen::MapActor()>()'
+    }
+
+typeconf 'mugen::MapConfig'
+    .custom_sol_constructor {
+        '"MapConfig", sol::constructors<mugen::MapConfig()>()'
+    }
+
 typeconf 'mugen::Config'
+    .exclude "destroyInstance"
+    .exclude "getInstance"
+    .custom_sol_constructor {
+        '"Config", sol::constructors<mugen::Config()>()'
+    }
+    .custom_sol_function {
+[[
+    "getInstance", []() {
+        return mugen::Config::getInstance();
+    }
+]]
+    }

@@ -13,6 +13,14 @@ local function has_packable_or_fromtable_class(module)
     return false
 end
 
+local function starts_with(str, prefix)
+    return str:sub(1, #prefix) == prefix
+end
+
+function string_contains(str, sub)
+    return str:find(sub, 1, true) ~= nil
+end
+
 local function string_ltrim(input)
     local lines = {}
 
@@ -32,6 +40,13 @@ local function string_ltrim(input)
 
     local result = table.concat(lines, "\n")
     return result
+end
+
+local function need_export_to_ref(typename)
+    if starts_with(typename, "std::") and (string_contains(typename, "vector") or string_contains(typename, "map")) then
+        return true
+    end
+    return starts_with(typename, "mugen::")
 end
 
 ---@param module idl.gen.module_desc
@@ -140,11 +155,28 @@ NS_MG_END
         -- print(vi.get.funcdesc)
         -- print(vi.get.prototype)
         -- print(ret_type)
+    
+        if ret_type == nil then
+            local str = vi.get.funcdesc
+            local last_space = str:find("[^%s]*$") - 1  -- 找到最后一个空格的索引
+            if last_space > 0 then
+                local result = str:sub(1, last_space - 1)
+                if result ~= "" then
+                    ret_type = result
+                end
+            end
+        end
 
         if ret_type == nil or cls.options.is_not_extend_object then
             lines[#lines + 1] = olua.format([["${var_name}", &${cls.cxxcls}::${var_name}]])
         else
-            lines[#lines + 1] = olua.format([[LUA_PROPERTY_GET_SET(${cls.cxxcls}, ${var_name}, ${ret_type})]])
+            if not starts_with(ret_type, "@") then
+                if need_export_to_ref(ret_type) then
+                    lines[#lines + 1] = olua.format([[LUA_PROPERTY_GET_REF(${cls.cxxcls}, ${var_name}, ${ret_type})]])
+                else
+                    lines[#lines + 1] = olua.format([[LUA_PROPERTY_GET_SET(${cls.cxxcls}, ${var_name}, ${ret_type})]])
+                end
+            end
         end
     end
 
@@ -166,9 +198,21 @@ NS_MG_END
         headers = module.headers
     end
 
+    local custom_code = ""
+    if type(cls.options.custom_code) == "table" then
+        -- local custom_code_lines = {}
+        -- for k, v in pairs(cls.options.custom_code) do
+        --     custom_code_lines[#custom_code_lines + 1] = string_ltrim(v)
+        -- end
+        -- custom_code = table.concat(custom_code_lines, "\n")
+        custom_code = table.concat(cls.options.custom_code, "\n")
+    end
+
+
     write(olua.format([[
     #include "mugen/tolua/tolua_common.h"
     ${headers}
+${custom_code}
 
 NS_MG_BEGIN
 
