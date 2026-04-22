@@ -240,9 +240,35 @@ typeconf 'mugen::DamageBox'
         '"DamageBox", sol::constructors<mugen::DamageBox()>()'
     }
 
+
+-- expr
+typeconf 'mugen::Vec2Expr'
+    .custom_sol_constructor {
+        '"Vec2Expr", sol::constructors<mugen::Vec2Expr()>()'
+    }
+    .exclude "toVec2f"
+    .exclude "toVec2i"
+    .exclude "f32_x"
+    .exclude "f32_y"
+    .exclude "i32_x"
+    .exclude "i32_y"
+
+typeconf 'mugen::Vec3Expr'
+    .custom_sol_constructor {
+        '"Vec3Expr", sol::constructors<mugen::Vec3Expr()>()'
+    }
+    .exclude "toVec3f"
+    .exclude "toVec3i"
+    .exclude "f32_x"
+    .exclude "f32_y"
+    .exclude "f32_z"
+    .exclude "i32_x"
+    .exclude "i32_y"
+    .exclude "i32_z"
+
 -- GameDef enums
 typeconf 'mugen::JobType'
-typeconf 'mugen::AtkType'
+typeconf 'mugen::HitType'
 typeconf 'mugen::ElementalProperty'
 typeconf 'mugen::EquipmentType'
 typeconf 'mugen::EquipmentSubType'
@@ -270,90 +296,65 @@ typeconf 'mugen::MotionConfig'
     }
 
 
-typeconf 'mugen::SkillTriggerType'
-typeconf 'mugen::SkillStateDurationType'
-typeconf 'mugen::SkillInterruptType'
-typeconf 'mugen::SkillTriggerConfig'
+typeconf 'mugen::SkillActivationConfig'
     .custom_sol_constructor {
-        '"SkillTriggerConfig", sol::constructors<mugen::SkillTriggerConfig()>()'
+        '"SkillActivationConfig", sol::constructors<mugen::SkillActivationConfig()>()'
     }
-typeconf 'mugen::SkillStateConfig'
+typeconf 'mugen::SkillHitConfig'
     .custom_sol_constructor {
-        '"SkillStateConfig", sol::constructors<mugen::SkillStateConfig()>()'
+        '"SkillHitConfig", sol::constructors<mugen::SkillHitConfig()>()'
     }
-typeconf 'mugen::SkillCancelRuleConfig'
+typeconf 'mugen::SkillStageConfig'
     .custom_sol_constructor {
-        '"SkillCancelRuleConfig", sol::constructors<mugen::SkillCancelRuleConfig()>()'
-    }
-typeconf 'mugen::SkillInterruptRuleConfig'
-    .custom_sol_constructor {
-        '"SkillInterruptRuleConfig", sol::constructors<mugen::SkillInterruptRuleConfig()>()'
-    }
-typeconf 'mugen::SkillHitResponseConfig'
-    .custom_sol_constructor {
-        '"SkillHitResponseConfig", sol::constructors<mugen::SkillHitResponseConfig()>()'
+        '"SkillStageConfig", sol::constructors<mugen::SkillStageConfig()>()'
     }
 typeconf 'mugen::SkillConfig'
     .custom_sol_constructor {
         '"SkillConfig", sol::constructors<mugen::SkillConfig()>()'
     }
 
-typeconf 'mugen::ActorInputTriggerType'
-typeconf 'mugen::ActorBindingTargetType'
-typeconf 'mugen::ActorTransitionConditionType'
-typeconf 'mugen::ActorHitType'
-typeconf 'mugen::ActorStateConfig'
+
+typeconf 'mugen::ChrHitReactionConfig'
     .custom_sol_constructor {
-        '"ActorStateConfig", sol::constructors<mugen::ActorStateConfig()>()'
+        '"ChrHitReactionConfig", sol::constructors<mugen::ChrHitReactionConfig()>()'
     }
-typeconf 'mugen::ActorInputConditionConfig'
+typeconf 'mugen::ChrStateConfig'
     .custom_sol_constructor {
-        '"ActorInputConditionConfig", sol::constructors<mugen::ActorInputConditionConfig()>()'
+        '"ChrStateConfig", sol::constructors<mugen::ChrStateConfig()>()'
     }
-typeconf 'mugen::ActorInputBindingConfig'
+typeconf 'mugen::ChrTransitionConditionConfig'
     .custom_sol_constructor {
-        '"ActorInputBindingConfig", sol::constructors<mugen::ActorInputBindingConfig()>()'
+        '"ChrTransitionConditionConfig", sol::constructors<mugen::ChrTransitionConditionConfig()>()'
     }
-typeconf 'mugen::ActorTransitionConditionConfig'
+typeconf 'mugen::ChrTransitionConfig'
     .custom_sol_constructor {
-        '"ActorTransitionConditionConfig", sol::constructors<mugen::ActorTransitionConditionConfig()>()'
+        '"ChrTransitionConfig", sol::constructors<mugen::ChrTransitionConfig()>()'
     }
-typeconf 'mugen::ActorTransitionConfig'
+typeconf 'mugen::ChrSkillItemConfig'
     .custom_sol_constructor {
-        '"ActorTransitionConfig", sol::constructors<mugen::ActorTransitionConfig()>()'
+        '"ChrSkillItemConfig", sol::constructors<mugen::ChrSkillItemConfig()>()'
     }
-typeconf 'mugen::ActorHitMappingConfig'
+typeconf 'mugen::ChrAttributeConfig'
     .custom_sol_constructor {
-        '"ActorHitMappingConfig", sol::constructors<mugen::ActorHitMappingConfig()>()'
+        '"ChrAttributeConfig", sol::constructors<mugen::ChrAttributeConfig()>()'
     }
-typeconf 'mugen::ActorSkillRefConfig'
+typeconf 'mugen::ChrConfig'
     .custom_sol_constructor {
-        '"ActorSkillRefConfig", sol::constructors<mugen::ActorSkillRefConfig()>()'
+        '"ChrConfig", sol::constructors<mugen::ChrConfig()>()'
+    }
+
+typeconf 'mugen::ActorSlotSkillConfig'
+    .custom_sol_constructor {
+        '"ActorSlotSkillConfig", sol::constructors<mugen::ActorSlotSkillConfig()>()'
+    }
+typeconf 'mugen::ActorEquipmentConfig'
+    .custom_sol_constructor {
+        '"ActorEquipmentConfig", sol::constructors<mugen::ActorEquipmentConfig()>()'
     }
 typeconf 'mugen::ActorConfig'
     .custom_sol_constructor {
         '"ActorConfig", sol::constructors<mugen::ActorConfig()>()'
     }
-    .exclude 'equipments'
-    .custom_sol_function {
-[[
-    "equipment_count", [](const ActorConfig& self) {
-        return self.equipments.size();
-    },
-    "get_equipment", [](const ActorConfig& self, int index) {
-        if (index >= 1 && index <= static_cast<int>(self.equipments.size())) {
-            return self.equipments[index - 1];
-        }
-        return 0;
-    },
-    "set_equipment", [](ActorConfig& self, int index, int32_t value) {
-        if (index >= 1 && index <= static_cast<int>(self.equipments.size())) {
-            self.equipments[index - 1] = value;
-            return true;
-        }
-        return false;
-    }
-]]}
 
 
 typeconf 'mugen::AniLayConfig'
@@ -404,6 +405,17 @@ typeconf 'mugen::MapConfig'
 typeconf 'mugen::Config'
     .exclude "destroyInstance"
     .exclude "getInstance"
+    .exclude "getActorConfig"
+    .exclude "getAniConfig"
+    .exclude "getAniLayConfig"
+    .exclude "getAtkConfig"
+    .exclude "getChrConfig"
+    .exclude "getEquConfig"
+    .exclude "getEquConfigById"
+    .exclude "getMapConfig"
+    .exclude "getMapConfigById"
+    .exclude "getSkillConfig,"
+    .exclude "getSkillConfigById"
     .custom_sol_constructor {
         '"Config", sol::constructors<mugen::Config()>()'
     }
