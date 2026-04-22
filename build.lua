@@ -147,15 +147,6 @@ local function typeenum(cls)
         .luaname(luaname)
 end
 
-typeconf 'mugen::fixed_number32'
-    .ignore_self_type 'true'
-    
-typeconf 'mugen::fixed_number64'
-    .ignore_self_type 'true'
-
-typeconf 'mugen::fixedPoint'
-    .ignore_self_type 'true'
-
 typeconf 'mugen::ByteBuffer'
     .ignore_self_type 'true'
 
