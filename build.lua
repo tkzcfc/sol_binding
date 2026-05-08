@@ -3,6 +3,7 @@ require "olua"
 inspect = require('inspect')
 
 local ROOT_SOURCE_DIR = 'D:/work/AxmolFighter/client/Source'
+local OUTPUT_SOURCE_DIR = 'D:/work/AxmolFighter/tools/3rd/mugen_tolua/auto'
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -84,10 +85,12 @@ local function autoGenerateMacroDefinitionFile(dir_name, out_file_name, macro_na
     end
     table.insert(lines, "")
 
+    table.insert(lines, "// clang-format off")
     for k, v in pairs(types) do
         types[k] = string.format("X(%s)", v)
     end
     table.insert(lines, string.format("#define %s %s", macro_name, table.concat(types, " ")))
+    table.insert(lines, "// clang-format on")
 
     local content = table.concat(lines, "\n")
     olua.write(root_dir .. "/" .. out_file_name, content)
@@ -122,7 +125,8 @@ clang {
 -------------------------------------------------------------------------------
 module 'mugen'
 
-output_dir(ROOT_SOURCE_DIR .. '/mugen/tolua/auto')
+
+output_dir(OUTPUT_SOURCE_DIR)
 
 api_dir 'autobuild/addons/mugen'
 
@@ -295,7 +299,14 @@ typeconf 'mugen::MotionConfig'
         '"MotionConfig", sol::constructors<mugen::MotionConfig()>()'
     }
 
-
+typeconf 'mugen::ComboInputCondition'
+    .custom_sol_constructor {
+        '"ComboInputCondition", sol::constructors<mugen::ComboInputCondition()>()'
+    }
+typeconf 'mugen::InputBufferConfig'
+    .custom_sol_constructor {
+        '"InputBufferConfig", sol::constructors<mugen::InputBufferConfig()>()'
+    }
 typeconf 'mugen::SkillActivationConfig'
     .custom_sol_constructor {
         '"SkillActivationConfig", sol::constructors<mugen::SkillActivationConfig()>()'
@@ -346,6 +357,10 @@ typeconf 'mugen::ChrConfig'
 typeconf 'mugen::ActorSlotSkillConfig'
     .custom_sol_constructor {
         '"ActorSlotSkillConfig", sol::constructors<mugen::ActorSlotSkillConfig()>()'
+    }
+typeconf 'mugen::ActorSkillConfig'
+    .custom_sol_constructor {
+        '"ActorSkillConfig", sol::constructors<mugen::ActorSkillConfig()>()'
     }
 typeconf 'mugen::ActorEquipmentConfig'
     .custom_sol_constructor {
@@ -400,6 +415,15 @@ typeconf 'mugen::MapActor'
 typeconf 'mugen::MapConfig'
     .custom_sol_constructor {
         '"MapConfig", sol::constructors<mugen::MapConfig()>()'
+    }
+
+typeconf 'mugen::SoundConfig'
+    .custom_sol_constructor {
+        '"SoundConfig", sol::constructors<mugen::SoundConfig()>()'
+    }
+typeconf 'mugen::SoundItem'
+    .custom_sol_constructor {
+        '"SoundItem", sol::constructors<mugen::SoundItem()>()'
     }
 
 typeconf 'mugen::Config'

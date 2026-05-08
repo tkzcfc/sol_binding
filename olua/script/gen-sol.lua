@@ -76,7 +76,7 @@ local function gen_class_open(module, cls, write, register_class_arr)
         local code = table.concat(lines, ",\n")
 
         write(olua.format([[
-#include "mugen/tolua/tolua_common.h"
+#include "../tolua_common.h"
 ${headers}
 
 NS_MG_BEGIN
@@ -210,7 +210,7 @@ NS_MG_END
 
 
     write(olua.format([[
-    #include "mugen/tolua/tolua_common.h"
+    #include "../tolua_common.h"
     ${headers}
 ${custom_code}
 
@@ -254,7 +254,7 @@ local function gen_header(module)
         // AUTO GENERATED, DO NOT MODIFY!
         //
         #pragma once
-        #include "mugen/tolua/tolua_common.h"
+        #include "../tolua_common.h"
 
         NS_MG_BEGIN
 
