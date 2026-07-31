@@ -48,7 +48,14 @@ local function listDirectory(path, options)
     return files
 end
 
-local function autoGenerateMacroDefinitionFile(dir_name, out_file_name, macro_name, ignore_names)
+local function tableContains(tab, value)
+    for k, v in pairs(tab or {}) do
+        if v == value then return true end
+    end
+    return false
+end
+
+local function autoGenerateMacroDefinitionFile(dir_name, out_file_name, macro_name, ignore_names, macro_cfg)
     local root_dir = ROOT_SOURCE_DIR .. "/mugen"
     local search_dir = root_dir .. "/" .. dir_name
     local items = listDirectory(search_dir, {
@@ -75,21 +82,73 @@ local function autoGenerateMacroDefinitionFile(dir_name, out_file_name, macro_na
         end
     end
 
+
+    if not macro_cfg then
+        macro_cfg = {}
+    end
+    macro_cfg.types = macro_cfg.types or {}
+    if macro_cfg.macro == nil then
+        macro_cfg.types = {}
+    end
+
+
+
     local lines = {
         "#pragma once",
         "",
     }
-
+    local macro_types = {}
     for k, v in pairs(types) do
-       table.insert(lines, string.format("#include \"%s/%s.h\"", dir_name, v))
+        if tableContains(macro_cfg.types, v) then
+            table.insert(macro_types, v)
+        else
+            table.insert(lines, string.format("#include \"%s/%s.h\"", dir_name, v))
+        end
     end
     table.insert(lines, "")
 
-    table.insert(lines, "// clang-format off")
-    for k, v in pairs(types) do
-        types[k] = string.format("X(%s)", v)
+    if #macro_types > 0 then
+        table.insert(lines, string.format("#ifdef %s", macro_cfg.macro))
+
+        for k, v in pairs(macro_types) do
+            table.insert(lines, string.format("#    include \"%s/%s.h\"", dir_name, v))
+        end
+
+        table.insert(lines, "#endif")
+        table.insert(lines, "")
     end
-    table.insert(lines, string.format("#define %s %s", macro_name, table.concat(types, " ")))
+
+    table.insert(lines, "// clang-format off")
+
+    local names = {}
+    if macro_cfg.macro then
+        table.insert(lines, string.format("#ifdef %s", macro_cfg.macro))
+
+            names = {}
+            for k, v in pairs(types) do
+                names[#names + 1] = string.format("X(%s)", v)
+            end
+            table.insert(lines, string.format("#    define %s %s", macro_name, table.concat(names, " ")))
+
+        table.insert(lines, "#else")
+
+            names = {}
+            for k, v in pairs(types) do
+                if not tableContains(macro_cfg.types, v) then
+                    names[#names + 1] = string.format("X(%s)", v)
+                end
+            end
+            table.insert(lines, string.format("#    define %s %s", macro_name, table.concat(names, " ")))
+        
+        table.insert(lines, "#endif")
+    else
+        names = {}
+        for k, v in pairs(types) do
+            names[#names + 1] = string.format("X(%s)", v)
+        end
+        table.insert(lines, string.format("#define %s %s", macro_name, table.concat(names, " ")))
+    end
+    
     table.insert(lines, "// clang-format on")
 
     local content = table.concat(lines, "\n")
@@ -99,8 +158,15 @@ end
 if is_windows then
     autoGenerateMacroDefinitionFile("component", "Components.h", "COMPONENT_LIST")
     autoGenerateMacroDefinitionFile("system", "Systems.h", "SYSTEM_LIST")
-    autoGenerateMacroDefinitionFile("states", "States.h", "STATE_LIST", {"SkillState"})
-    autoGenerateMacroDefinitionFile("translations", "Translations.h", "TRANSLATION_LIST")
+    -- autoGenerateMacroDefinitionFile("system", "Systems.h", "SYSTEM_LIST", {}, {
+    --     macro = "RUNTIME_IN_AXMOL",
+    --     types = {
+    --         "AvatarRenderSystem",
+    --         "GameMapRenderSystem",
+    --     }
+    -- })
+    autoGenerateMacroDefinitionFile("state", "States.h", "STATE_LIST", {"SkillState"})
+    autoGenerateMacroDefinitionFile("transition", "Transitions.h", "TRANSITION_LIST")
 end
 
 
@@ -239,10 +305,10 @@ typeconf 'mugen::Vector3i'
     .custom_sol_constructor {
         '"Vector3i", sol::constructors<mugen::Vector3i()>()'
     }
-typeconf 'mugen::DamageBox'
-    .custom_sol_constructor {
-        '"DamageBox", sol::constructors<mugen::DamageBox()>()'
-    }
+-- typeconf 'mugen::DamageBox'
+--     .custom_sol_constructor {
+--         '"DamageBox", sol::constructors<mugen::DamageBox()>()'
+--     }
 
 
 -- expr
@@ -277,27 +343,15 @@ typeconf 'mugen::ElementalProperty'
 typeconf 'mugen::EquipmentType'
 typeconf 'mugen::EquipmentSubType'
 typeconf 'mugen::EquipmentRarityType'
+typeconf 'mugen::SpeedType'
+typeconf 'mugen::VelocityMode'
+typeconf 'mugen::ExitConditionType'
+typeconf 'mugen::FacingDirection'
+typeconf 'mugen::StateTag'
+typeconf 'mugen::AvatarType'
+typeconf 'mugen::SeekMode'
 
 -- Config
-typeconf 'mugen::Frame'
-    .custom_sol_constructor {
-        '"Frame", sol::constructors<mugen::Frame()>()'
-    }
-
-typeconf 'mugen::AniConfig'
-    .custom_sol_constructor {
-        '"AniConfig", sol::constructors<mugen::AniConfig()>()'
-    }
-
-typeconf 'mugen::AtkConfig'
-    .custom_sol_constructor {
-        '"AtkConfig", sol::constructors<mugen::AtkConfig()>()'
-    }
-
-typeconf 'mugen::MotionConfig'
-    .custom_sol_constructor {
-        '"MotionConfig", sol::constructors<mugen::MotionConfig()>()'
-    }
 
 typeconf 'mugen::ComboInputCondition'
     .custom_sol_constructor {
@@ -315,6 +369,10 @@ typeconf 'mugen::SkillHitConfig'
     .custom_sol_constructor {
         '"SkillHitConfig", sol::constructors<mugen::SkillHitConfig()>()'
     }
+typeconf 'mugen::SeekToConfig'
+    .custom_sol_constructor {
+        '"SeekToConfig", sol::constructors<mugen::SeekToConfig()>()'
+    }
 typeconf 'mugen::SkillStageConfig'
     .custom_sol_constructor {
         '"SkillStageConfig", sol::constructors<mugen::SkillStageConfig()>()'
@@ -323,6 +381,7 @@ typeconf 'mugen::SkillConfig'
     .custom_sol_constructor {
         '"SkillConfig", sol::constructors<mugen::SkillConfig()>()'
     }
+    .exclude "sourcePath"
 
 
 typeconf 'mugen::ChrHitReactionConfig'
@@ -349,10 +408,15 @@ typeconf 'mugen::ChrAttributeConfig'
     .custom_sol_constructor {
         '"ChrAttributeConfig", sol::constructors<mugen::ChrAttributeConfig()>()'
     }
+typeconf 'mugen::ChrEquipmentConfig'
+    .custom_sol_constructor {
+        '"ChrEquipmentConfig", sol::constructors<mugen::ChrEquipmentConfig()>()'
+    }
 typeconf 'mugen::ChrConfig'
     .custom_sol_constructor {
         '"ChrConfig", sol::constructors<mugen::ChrConfig()>()'
     }
+    .exclude "sourcePath"
 
 typeconf 'mugen::ActorSlotSkillConfig'
     .custom_sol_constructor {
@@ -370,12 +434,7 @@ typeconf 'mugen::ActorConfig'
     .custom_sol_constructor {
         '"ActorConfig", sol::constructors<mugen::ActorConfig()>()'
     }
-
-
-typeconf 'mugen::AniLayConfig'
-    .custom_sol_constructor {
-        '"AniLayConfig", sol::constructors<mugen::AniLayConfig()>()'
-    }
+    .exclude "sourcePath"
 
 typeconf 'mugen::EquAnimationLayerConfig'
     .custom_sol_constructor {
@@ -390,32 +449,22 @@ typeconf 'mugen::EquConfig'
     .custom_sol_constructor {
         '"EquConfig", sol::constructors<mugen::EquConfig()>()'
     }
+    .exclude "sourcePath"
 
-typeconf 'mugen::MapItem'
-    .custom_sol_constructor {
-        '"MapItem", sol::constructors<mugen::MapItem()>()'
-    }
-typeconf 'mugen::MapLayer'
-    .custom_sol_constructor {
-        '"MapLayer", sol::constructors<mugen::MapLayer()>()'
-    }
-typeconf 'mugen::BackgroundLayer'
-    .custom_sol_constructor {
-        '"BackgroundLayer", sol::constructors<mugen::BackgroundLayer()>()'
-    }
 typeconf 'mugen::MapScope'
     .custom_sol_constructor {
         '"MapScope", sol::constructors<mugen::MapScope()>()'
     }
-typeconf 'mugen::MapActor'
+typeconf 'mugen::MapActorSpawn'
     .custom_sol_constructor {
-        '"MapActor", sol::constructors<mugen::MapActor()>()'
+        '"MapActorSpawn", sol::constructors<mugen::MapActorSpawn()>()'
     }
 
 typeconf 'mugen::MapConfig'
     .custom_sol_constructor {
         '"MapConfig", sol::constructors<mugen::MapConfig()>()'
     }
+    .exclude "sourcePath"
 
 typeconf 'mugen::SoundConfig'
     .custom_sol_constructor {
@@ -425,21 +474,19 @@ typeconf 'mugen::SoundItem'
     .custom_sol_constructor {
         '"SoundItem", sol::constructors<mugen::SoundItem()>()'
     }
+typeconf 'mugen::SoundRandomItem'
+    .custom_sol_constructor {
+        '"SoundRandomItem", sol::constructors<mugen::SoundRandomItem()>()'
+    }
+typeconf 'mugen::SoundRandomGroup'
+    .custom_sol_constructor {
+        '"SoundRandomGroup", sol::constructors<mugen::SoundRandomGroup()>()'
+    }
 
 typeconf 'mugen::Config'
     .exclude "destroyInstance"
     .exclude "getInstance"
-    .exclude "getActorConfig"
-    .exclude "getAniConfig"
-    .exclude "getAniLayConfig"
-    .exclude "getAtkConfig"
-    .exclude "getChrConfig"
-    .exclude "getEquConfig"
-    .exclude "getEquConfigById"
-    .exclude "getMapConfig"
-    .exclude "getMapConfigById"
-    .exclude "getSkillConfig,"
-    .exclude "getSkillConfigById"
+    .exclude "getActorConfigByJob"
     .custom_sol_constructor {
         '"Config", sol::constructors<mugen::Config()>()'
     }
