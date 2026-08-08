@@ -2,8 +2,8 @@ require "olua"
 
 inspect = require('inspect')
 
-local ROOT_SOURCE_DIR = 'D:/work/AxmolFighter/client/Source'
-local OUTPUT_SOURCE_DIR = 'D:/work/AxmolFighter/tools/3rd/mugen_tolua/auto'
+local ROOT_SOURCE_DIR = 'D:/work/AxmolFighter/AxmolFighter-Client/Source'
+local OUTPUT_SOURCE_DIR = 'D:/work/AxmolFighter/AxmolFighter-Tools/3rd/mugen_tolua/auto'
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -466,27 +466,162 @@ typeconf 'mugen::MapConfig'
     }
     .exclude "sourcePath"
 
-typeconf 'mugen::SoundConfig'
+-- Table configs (town/camp/stage/...)
+typeconf 'mugen::PortalDestEntry'
     .custom_sol_constructor {
-        '"SoundConfig", sol::constructors<mugen::SoundConfig()>()'
+        '"PortalDestEntry", sol::constructors<mugen::PortalDestEntry()>()'
     }
-typeconf 'mugen::SoundItem'
+typeconf 'mugen::PortalEntry'
     .custom_sol_constructor {
-        '"SoundItem", sol::constructors<mugen::SoundItem()>()'
+        '"PortalEntry", sol::constructors<mugen::PortalEntry()>()'
     }
-typeconf 'mugen::SoundRandomItem'
+typeconf 'mugen::NpcSlotEntry'
     .custom_sol_constructor {
-        '"SoundRandomItem", sol::constructors<mugen::SoundRandomItem()>()'
+        '"NpcSlotEntry", sol::constructors<mugen::NpcSlotEntry()>()'
     }
-typeconf 'mugen::SoundRandomGroup'
+typeconf 'mugen::GoodEntry'
     .custom_sol_constructor {
-        '"SoundRandomGroup", sol::constructors<mugen::SoundRandomGroup()>()'
+        '"GoodEntry", sol::constructors<mugen::GoodEntry()>()'
+    }
+typeconf 'mugen::ObstacleEntry'
+    .custom_sol_constructor {
+        '"ObstacleEntry", sol::constructors<mugen::ObstacleEntry()>()'
+    }
+typeconf 'mugen::ActorSpawnEntry'
+    .custom_sol_constructor {
+        '"ActorSpawnEntry", sol::constructors<mugen::ActorSpawnEntry()>()'
+    }
+typeconf 'mugen::MonsterEntry'
+    .custom_sol_constructor {
+        '"MonsterEntry", sol::constructors<mugen::MonsterEntry()>()'
+    }
+typeconf 'mugen::ConnectCity'
+    .custom_sol_constructor {
+        '"ConnectCity", sol::constructors<mugen::ConnectCity()>()'
+    }
+typeconf 'mugen::ChapterRewardPhase'
+    .custom_sol_constructor {
+        '"ChapterRewardPhase", sol::constructors<mugen::ChapterRewardPhase()>()'
+    }
+typeconf 'mugen::MapDataConfig'
+    .custom_sol_constructor {
+        '"MapDataConfig", sol::constructors<mugen::MapDataConfig()>()'
+    }
+typeconf 'mugen::TownConfig'
+    .custom_sol_constructor {
+        '"TownConfig", sol::constructors<mugen::TownConfig()>()'
+    }
+typeconf 'mugen::CampConfig'
+    .custom_sol_constructor {
+        '"CampConfig", sol::constructors<mugen::CampConfig()>()'
+    }
+typeconf 'mugen::StageConfig'
+    .custom_sol_constructor {
+        '"StageConfig", sol::constructors<mugen::StageConfig()>()'
+    }
+typeconf 'mugen::CopyConfig'
+    .custom_sol_constructor {
+        '"CopyConfig", sol::constructors<mugen::CopyConfig()>()'
+    }
+typeconf 'mugen::ChapterConfig'
+    .custom_sol_constructor {
+        '"ChapterConfig", sol::constructors<mugen::ChapterConfig()>()'
+    }
+typeconf 'mugen::NpcConfig'
+    .custom_sol_constructor {
+        '"NpcConfig", sol::constructors<mugen::NpcConfig()>()'
+    }
+typeconf 'mugen::PortalConfig'
+    .custom_sol_constructor {
+        '"PortalConfig", sol::constructors<mugen::PortalConfig()>()'
+    }
+typeconf 'mugen::RoomConfig'
+    .custom_sol_constructor {
+        '"RoomConfig", sol::constructors<mugen::RoomConfig()>()'
+    }
+typeconf 'mugen::ActionAttackConfig'
+    .custom_sol_constructor {
+        '"ActionAttackConfig", sol::constructors<mugen::ActionAttackConfig()>()'
+    }
+typeconf 'mugen::SkillAttackConfig'
+    .custom_sol_constructor {
+        '"SkillAttackConfig", sol::constructors<mugen::SkillAttackConfig()>()'
+    }
+typeconf 'mugen::SkillHitTableConfig'
+    .custom_sol_constructor {
+        '"SkillHitTableConfig", sol::constructors<mugen::SkillHitTableConfig()>()'
+    }
+typeconf 'mugen::AttributeTemplateConfig'
+    .custom_sol_constructor {
+        '"AttributeTemplateConfig", sol::constructors<mugen::AttributeTemplateConfig()>()'
+    }
+typeconf 'mugen::ResSpineConfig'
+    .custom_sol_constructor {
+        '"ResSpineConfig", sol::constructors<mugen::ResSpineConfig()>()'
+    }
+typeconf 'mugen::RoleConfig'
+    .custom_sol_constructor {
+        '"RoleConfig", sol::constructors<mugen::RoleConfig()>()'
+    }
+typeconf 'mugen::ResSoundConfig'
+    .custom_sol_constructor {
+        '"ResSoundConfig", sol::constructors<mugen::ResSoundConfig()>()'
+    }
+typeconf 'mugen::SoundUiConfig'
+    .custom_sol_constructor {
+        '"SoundUiConfig", sol::constructors<mugen::SoundUiConfig()>()'
+    }
+typeconf 'mugen::SoundSpineConfig'
+    .custom_sol_constructor {
+        '"SoundSpineConfig", sol::constructors<mugen::SoundSpineConfig()>()'
+    }
+typeconf 'mugen::SoundSpineBgmConfig'
+    .custom_sol_constructor {
+        '"SoundSpineBgmConfig", sol::constructors<mugen::SoundSpineBgmConfig()>()'
+    }
+typeconf 'mugen::SoundMapSpineConfig'
+    .custom_sol_constructor {
+        '"SoundMapSpineConfig", sol::constructors<mugen::SoundMapSpineConfig()>()'
+    }
+typeconf 'mugen::SoundSendMessageConfig'
+    .custom_sol_constructor {
+        '"SoundSendMessageConfig", sol::constructors<mugen::SoundSendMessageConfig()>()'
+    }
+typeconf 'mugen::SoundTalkTextGroup'
+    .custom_sol_constructor {
+        '"SoundTalkTextGroup", sol::constructors<mugen::SoundTalkTextGroup()>()'
+    }
+typeconf 'mugen::SoundTalkConfig'
+    .custom_sol_constructor {
+        '"SoundTalkConfig", sol::constructors<mugen::SoundTalkConfig()>()'
     }
 
 typeconf 'mugen::Config'
     .exclude "destroyInstance"
     .exclude "getInstance"
     .exclude "getActorConfigByJob"
+    .exclude "getTownConfigById"
+    .exclude "getCampConfigById"
+    .exclude "getStageConfigById"
+    .exclude "getCopyConfigById"
+    .exclude "getChapterConfigById"
+    .exclude "getNpcConfigById"
+    .exclude "getPortalConfigById"
+    .exclude "getRoomConfigById"
+    .exclude "getMapDataConfigById"
+    .exclude "getSkillAttackConfigById"
+    .exclude "getActionAttackConfigById"
+    .exclude "getRoleConfigById"
+    .exclude "getResSpineConfigById"
+    .exclude "getResSoundById"
+    .exclude "getSoundUiByViewName"
+    .exclude "getSoundSpineById"
+    .exclude "getSoundSpineBgmById"
+    .exclude "getSoundMapSpineById"
+    .exclude "getSoundSendMessageById"
+    .exclude "getSoundTalkById"
+    .exclude "getSkillHitTableConfigById"
+    .exclude "getOrCreateMapConfigByKey"
     .custom_sol_constructor {
         '"Config", sol::constructors<mugen::Config()>()'
     }
