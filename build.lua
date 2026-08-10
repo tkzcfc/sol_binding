@@ -158,15 +158,7 @@ end
 if is_windows then
     autoGenerateMacroDefinitionFile("component", "Components.h", "COMPONENT_LIST")
     autoGenerateMacroDefinitionFile("system", "Systems.h", "SYSTEM_LIST")
-    -- autoGenerateMacroDefinitionFile("system", "Systems.h", "SYSTEM_LIST", {}, {
-    --     macro = "RUNTIME_IN_AXMOL",
-    --     types = {
-    --         "AvatarRenderSystem",
-    --         "GameMapRenderSystem",
-    --     }
-    -- })
-    autoGenerateMacroDefinitionFile("state", "States.h", "STATE_LIST", {"SkillState"})
-    autoGenerateMacroDefinitionFile("transition", "Transitions.h", "TRANSITION_LIST")
+    -- state/transition 目录已移除，不再生成 States.h / Transitions.h
 end
 
 
@@ -311,162 +303,31 @@ typeconf 'mugen::Vector3i'
 --     }
 
 
--- expr
-typeconf 'mugen::Vec2Expr'
-    .custom_sol_constructor {
-        '"Vec2Expr", sol::constructors<mugen::Vec2Expr()>()'
-    }
-    .exclude "toVec2f"
-    .exclude "toVec2i"
-    .exclude "f32_x"
-    .exclude "f32_y"
-    .exclude "i32_x"
-    .exclude "i32_y"
-
-typeconf 'mugen::Vec3Expr'
-    .custom_sol_constructor {
-        '"Vec3Expr", sol::constructors<mugen::Vec3Expr()>()'
-    }
-    .exclude "toVec3f"
-    .exclude "toVec3i"
-    .exclude "f32_x"
-    .exclude "f32_y"
-    .exclude "f32_z"
-    .exclude "i32_x"
-    .exclude "i32_y"
-    .exclude "i32_z"
+-- expr (Config 路径不再依赖，保留需自行加 headers)
+-- typeconf 'mugen::Vec2Expr'
+-- typeconf 'mugen::Vec3Expr'
 
 -- GameDef enums
+typeconf 'mugen::SlotTriggerFlag'
+typeconf 'mugen::EntityCategory'
 typeconf 'mugen::JobType'
 typeconf 'mugen::HitType'
-typeconf 'mugen::ElementalProperty'
-typeconf 'mugen::EquipmentType'
-typeconf 'mugen::EquipmentSubType'
-typeconf 'mugen::EquipmentRarityType'
-typeconf 'mugen::SpeedType'
-typeconf 'mugen::VelocityMode'
-typeconf 'mugen::ExitConditionType'
 typeconf 'mugen::FacingDirection'
 typeconf 'mugen::StateTag'
-typeconf 'mugen::AvatarType'
-typeconf 'mugen::SeekMode'
+typeconf 'mugen::BehaviorKind'
 
--- Config
-
-typeconf 'mugen::ComboInputCondition'
-    .custom_sol_constructor {
-        '"ComboInputCondition", sol::constructors<mugen::ComboInputCondition()>()'
-    }
-typeconf 'mugen::InputBufferConfig'
-    .custom_sol_constructor {
-        '"InputBufferConfig", sol::constructors<mugen::InputBufferConfig()>()'
-    }
-typeconf 'mugen::SkillActivationConfig'
-    .custom_sol_constructor {
-        '"SkillActivationConfig", sol::constructors<mugen::SkillActivationConfig()>()'
-    }
-typeconf 'mugen::SkillHitConfig'
-    .custom_sol_constructor {
-        '"SkillHitConfig", sol::constructors<mugen::SkillHitConfig()>()'
-    }
-typeconf 'mugen::SeekToConfig'
-    .custom_sol_constructor {
-        '"SeekToConfig", sol::constructors<mugen::SeekToConfig()>()'
-    }
-typeconf 'mugen::SkillStageConfig'
-    .custom_sol_constructor {
-        '"SkillStageConfig", sol::constructors<mugen::SkillStageConfig()>()'
-    }
-typeconf 'mugen::SkillConfig'
-    .custom_sol_constructor {
-        '"SkillConfig", sol::constructors<mugen::SkillConfig()>()'
-    }
-    .exclude "sourcePath"
-
-
-typeconf 'mugen::ChrHitReactionConfig'
-    .custom_sol_constructor {
-        '"ChrHitReactionConfig", sol::constructors<mugen::ChrHitReactionConfig()>()'
-    }
-typeconf 'mugen::ChrStateConfig'
-    .custom_sol_constructor {
-        '"ChrStateConfig", sol::constructors<mugen::ChrStateConfig()>()'
-    }
-typeconf 'mugen::ChrTransitionConditionConfig'
-    .custom_sol_constructor {
-        '"ChrTransitionConditionConfig", sol::constructors<mugen::ChrTransitionConditionConfig()>()'
-    }
-typeconf 'mugen::ChrTransitionConfig'
-    .custom_sol_constructor {
-        '"ChrTransitionConfig", sol::constructors<mugen::ChrTransitionConfig()>()'
-    }
-typeconf 'mugen::ChrSkillItemConfig'
-    .custom_sol_constructor {
-        '"ChrSkillItemConfig", sol::constructors<mugen::ChrSkillItemConfig()>()'
-    }
-typeconf 'mugen::ChrAttributeConfig'
-    .custom_sol_constructor {
-        '"ChrAttributeConfig", sol::constructors<mugen::ChrAttributeConfig()>()'
-    }
-typeconf 'mugen::ChrEquipmentConfig'
-    .custom_sol_constructor {
-        '"ChrEquipmentConfig", sol::constructors<mugen::ChrEquipmentConfig()>()'
-    }
-typeconf 'mugen::ChrConfig'
-    .custom_sol_constructor {
-        '"ChrConfig", sol::constructors<mugen::ChrConfig()>()'
-    }
-    .exclude "sourcePath"
-
-typeconf 'mugen::ActorSlotSkillConfig'
-    .custom_sol_constructor {
-        '"ActorSlotSkillConfig", sol::constructors<mugen::ActorSlotSkillConfig()>()'
-    }
-typeconf 'mugen::ActorSkillConfig'
-    .custom_sol_constructor {
-        '"ActorSkillConfig", sol::constructors<mugen::ActorSkillConfig()>()'
-    }
-typeconf 'mugen::ActorEquipmentConfig'
-    .custom_sol_constructor {
-        '"ActorEquipmentConfig", sol::constructors<mugen::ActorEquipmentConfig()>()'
-    }
-typeconf 'mugen::ActorConfig'
-    .custom_sol_constructor {
-        '"ActorConfig", sol::constructors<mugen::ActorConfig()>()'
-    }
-    .exclude "sourcePath"
-
-typeconf 'mugen::EquAnimationLayerConfig'
-    .custom_sol_constructor {
-        '"EquAnimationLayerConfig", sol::constructors<mugen::EquAnimationLayerConfig()>()'
-    }
-typeconf 'mugen::EquAnimationConfig'
-    .custom_sol_constructor {
-        '"EquAnimationConfig", sol::constructors<mugen::EquAnimationConfig()>()'
-    }
-
-typeconf 'mugen::EquConfig'
-    .custom_sol_constructor {
-        '"EquConfig", sol::constructors<mugen::EquConfig()>()'
-    }
-    .exclude "sourcePath"
-
+-- MapConfig
 typeconf 'mugen::MapScope'
     .custom_sol_constructor {
         '"MapScope", sol::constructors<mugen::MapScope()>()'
     }
-typeconf 'mugen::MapActorSpawn'
-    .custom_sol_constructor {
-        '"MapActorSpawn", sol::constructors<mugen::MapActorSpawn()>()'
-    }
-
 typeconf 'mugen::MapConfig'
     .custom_sol_constructor {
         '"MapConfig", sol::constructors<mugen::MapConfig()>()'
     }
     .exclude "sourcePath"
 
--- Table configs (town/camp/stage/...)
+-- Table configs
 typeconf 'mugen::PortalDestEntry'
     .custom_sol_constructor {
         '"PortalDestEntry", sol::constructors<mugen::PortalDestEntry()>()'
@@ -503,10 +364,6 @@ typeconf 'mugen::ChapterRewardPhase'
     .custom_sol_constructor {
         '"ChapterRewardPhase", sol::constructors<mugen::ChapterRewardPhase()>()'
     }
-typeconf 'mugen::MapDataConfig'
-    .custom_sol_constructor {
-        '"MapDataConfig", sol::constructors<mugen::MapDataConfig()>()'
-    }
 typeconf 'mugen::TownConfig'
     .custom_sol_constructor {
         '"TownConfig", sol::constructors<mugen::TownConfig()>()'
@@ -539,6 +396,18 @@ typeconf 'mugen::RoomConfig'
     .custom_sol_constructor {
         '"RoomConfig", sol::constructors<mugen::RoomConfig()>()'
     }
+typeconf 'mugen::RoleAttributeConfig'
+    .custom_sol_constructor {
+        '"RoleAttributeConfig", sol::constructors<mugen::RoleAttributeConfig()>()'
+    }
+typeconf 'mugen::BehaviorBranchConfig'
+    .custom_sol_constructor {
+        '"BehaviorBranchConfig", sol::constructors<mugen::BehaviorBranchConfig()>()'
+    }
+typeconf 'mugen::BehaviorTemplateConfig'
+    .custom_sol_constructor {
+        '"BehaviorTemplateConfig", sol::constructors<mugen::BehaviorTemplateConfig()>()'
+    }
 typeconf 'mugen::ActionAttackConfig'
     .custom_sol_constructor {
         '"ActionAttackConfig", sol::constructors<mugen::ActionAttackConfig()>()'
@@ -558,6 +427,34 @@ typeconf 'mugen::AttributeTemplateConfig'
 typeconf 'mugen::ResSpineConfig'
     .custom_sol_constructor {
         '"ResSpineConfig", sol::constructors<mugen::ResSpineConfig()>()'
+    }
+typeconf 'mugen::DisplacementConfig'
+    .custom_sol_constructor {
+        '"DisplacementConfig", sol::constructors<mugen::DisplacementConfig()>()'
+    }
+typeconf 'mugen::CameraConfig'
+    .custom_sol_constructor {
+        '"CameraConfig", sol::constructors<mugen::CameraConfig()>()'
+    }
+typeconf 'mugen::EffectConfig'
+    .custom_sol_constructor {
+        '"EffectConfig", sol::constructors<mugen::EffectConfig()>()'
+    }
+typeconf 'mugen::BuffConfig'
+    .custom_sol_constructor {
+        '"BuffConfig", sol::constructors<mugen::BuffConfig()>()'
+    }
+typeconf 'mugen::AiConfig'
+    .custom_sol_constructor {
+        '"AiConfig", sol::constructors<mugen::AiConfig()>()'
+    }
+typeconf 'mugen::SkillHurtConfig'
+    .custom_sol_constructor {
+        '"SkillHurtConfig", sol::constructors<mugen::SkillHurtConfig()>()'
+    }
+typeconf 'mugen::SkillActivationOverlayConfig'
+    .custom_sol_constructor {
+        '"SkillActivationOverlayConfig", sol::constructors<mugen::SkillActivationOverlayConfig()>()'
     }
 typeconf 'mugen::RoleConfig'
     .custom_sol_constructor {
@@ -595,11 +492,30 @@ typeconf 'mugen::SoundTalkConfig'
     .custom_sol_constructor {
         '"SoundTalkConfig", sol::constructors<mugen::SoundTalkConfig()>()'
     }
+typeconf 'mugen::EquipConfig'
+    .custom_sol_constructor {
+        '"EquipConfig", sol::constructors<mugen::EquipConfig()>()'
+    }
+typeconf 'mugen::FashionConfig'
+    .custom_sol_constructor {
+        '"FashionConfig", sol::constructors<mugen::FashionConfig()>()'
+    }
+typeconf 'mugen::FashionSuitConfig'
+    .custom_sol_constructor {
+        '"FashionSuitConfig", sol::constructors<mugen::FashionSuitConfig()>()'
+    }
+typeconf 'mugen::ItemBaseConfig'
+    .custom_sol_constructor {
+        '"ItemBaseConfig", sol::constructors<mugen::ItemBaseConfig()>()'
+    }
+typeconf 'mugen::ResFashionConfig'
+    .custom_sol_constructor {
+        '"ResFashionConfig", sol::constructors<mugen::ResFashionConfig()>()'
+    }
 
 typeconf 'mugen::Config'
     .exclude "destroyInstance"
     .exclude "getInstance"
-    .exclude "getActorConfigByJob"
     .exclude "getTownConfigById"
     .exclude "getCampConfigById"
     .exclude "getStageConfigById"
@@ -611,8 +527,23 @@ typeconf 'mugen::Config'
     .exclude "getMapDataConfigById"
     .exclude "getSkillAttackConfigById"
     .exclude "getActionAttackConfigById"
+    .exclude "getSkillHitTableConfigById"
     .exclude "getRoleConfigById"
     .exclude "getResSpineConfigById"
+    .exclude "getEquipConfigById"
+    .exclude "getFashionConfigById"
+    .exclude "getFashionSuitConfigById"
+    .exclude "getItemBaseConfigById"
+    .exclude "getResFashionConfigById"
+    .exclude "getBehaviorTemplateConfigById"
+    .exclude "getDisplacementConfigById"
+    .exclude "getCameraConfigById"
+    .exclude "getEffectConfigById"
+    .exclude "getBuffConfigById"
+    .exclude "getAiConfigById"
+    .exclude "getSkillHurtConfigById"
+    .exclude "getSkillActivationOverlayById"
+    .exclude "getAttributeTemplateConfigById"
     .exclude "getResSoundById"
     .exclude "getSoundUiByViewName"
     .exclude "getSoundSpineById"
@@ -620,7 +551,6 @@ typeconf 'mugen::Config'
     .exclude "getSoundMapSpineById"
     .exclude "getSoundSendMessageById"
     .exclude "getSoundTalkById"
-    .exclude "getSkillHitTableConfigById"
     .exclude "getOrCreateMapConfigByKey"
     .custom_sol_constructor {
         '"Config", sol::constructors<mugen::Config()>()'
