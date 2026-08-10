@@ -2,8 +2,8 @@ require "olua"
 
 inspect = require('inspect')
 
-local ROOT_SOURCE_DIR = 'D:/work/AxmolFighter/AxmolFighter-Client/Source'
-local OUTPUT_SOURCE_DIR = 'D:/work/AxmolFighter/AxmolFighter-Tools/3rd/mugen_tolua/auto'
+local ROOT_SOURCE_DIR = '../..//AxmolFighter-Client/Source'
+local OUTPUT_SOURCE_DIR = '../3rd/mugen_tolua/auto'
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -158,7 +158,6 @@ end
 if is_windows then
     autoGenerateMacroDefinitionFile("component", "Components.h", "COMPONENT_LIST")
     autoGenerateMacroDefinitionFile("system", "Systems.h", "SYSTEM_LIST")
-    -- state/transition 目录已移除，不再生成 States.h / Transitions.h
 end
 
 
@@ -316,17 +315,6 @@ typeconf 'mugen::FacingDirection'
 typeconf 'mugen::StateTag'
 typeconf 'mugen::BehaviorKind'
 
--- MapConfig
-typeconf 'mugen::MapScope'
-    .custom_sol_constructor {
-        '"MapScope", sol::constructors<mugen::MapScope()>()'
-    }
-typeconf 'mugen::MapConfig'
-    .custom_sol_constructor {
-        '"MapConfig", sol::constructors<mugen::MapConfig()>()'
-    }
-    .exclude "sourcePath"
-
 -- Table configs
 typeconf 'mugen::PortalDestEntry'
     .custom_sol_constructor {
@@ -396,6 +384,10 @@ typeconf 'mugen::RoomConfig'
     .custom_sol_constructor {
         '"RoomConfig", sol::constructors<mugen::RoomConfig()>()'
     }
+typeconf 'mugen::IntListRow'
+    .custom_sol_constructor {
+        '"IntListRow", sol::constructors<mugen::IntListRow()>()'
+    }
 typeconf 'mugen::RoleAttributeConfig'
     .custom_sol_constructor {
         '"RoleAttributeConfig", sol::constructors<mugen::RoleAttributeConfig()>()'
@@ -444,9 +436,17 @@ typeconf 'mugen::BuffConfig'
     .custom_sol_constructor {
         '"BuffConfig", sol::constructors<mugen::BuffConfig()>()'
     }
+typeconf 'mugen::BuffRuleConfig'
+    .custom_sol_constructor {
+        '"BuffRuleConfig", sol::constructors<mugen::BuffRuleConfig()>()'
+    }
 typeconf 'mugen::AiConfig'
     .custom_sol_constructor {
         '"AiConfig", sol::constructors<mugen::AiConfig()>()'
+    }
+typeconf 'mugen::SkillAiConfig'
+    .custom_sol_constructor {
+        '"SkillAiConfig", sol::constructors<mugen::SkillAiConfig()>()'
     }
 typeconf 'mugen::SkillHurtConfig'
     .custom_sol_constructor {
@@ -524,7 +524,6 @@ typeconf 'mugen::Config'
     .exclude "getNpcConfigById"
     .exclude "getPortalConfigById"
     .exclude "getRoomConfigById"
-    .exclude "getMapDataConfigById"
     .exclude "getSkillAttackConfigById"
     .exclude "getActionAttackConfigById"
     .exclude "getSkillHitTableConfigById"
@@ -540,7 +539,9 @@ typeconf 'mugen::Config'
     .exclude "getCameraConfigById"
     .exclude "getEffectConfigById"
     .exclude "getBuffConfigById"
+    .exclude "getBuffRuleConfigById"
     .exclude "getAiConfigById"
+    .exclude "getSkillAiConfigById"
     .exclude "getSkillHurtConfigById"
     .exclude "getSkillActivationOverlayById"
     .exclude "getAttributeTemplateConfigById"
@@ -551,7 +552,7 @@ typeconf 'mugen::Config'
     .exclude "getSoundMapSpineById"
     .exclude "getSoundSendMessageById"
     .exclude "getSoundTalkById"
-    .exclude "getOrCreateMapConfigByKey"
+    .exclude "getChapterConfigs"
     .custom_sol_constructor {
         '"Config", sol::constructors<mugen::Config()>()'
     }
