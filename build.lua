@@ -309,7 +309,7 @@ typeconf 'mugen::Vector3i'
 -- GameDef enums
 typeconf 'mugen::SlotTriggerFlag'
 typeconf 'mugen::EntityCategory'
-typeconf 'mugen::JobType'
+typeconf 'mugen::CharacterClass'
 typeconf 'mugen::HitType'
 typeconf 'mugen::FacingDirection'
 typeconf 'mugen::StateTag'
@@ -388,10 +388,6 @@ typeconf 'mugen::IntListRow'
     .custom_sol_constructor {
         '"IntListRow", sol::constructors<mugen::IntListRow()>()'
     }
-typeconf 'mugen::RoleAttributeConfig'
-    .custom_sol_constructor {
-        '"RoleAttributeConfig", sol::constructors<mugen::RoleAttributeConfig()>()'
-    }
 typeconf 'mugen::BehaviorBranchConfig'
     .custom_sol_constructor {
         '"BehaviorBranchConfig", sol::constructors<mugen::BehaviorBranchConfig()>()'
@@ -451,10 +447,6 @@ typeconf 'mugen::SkillAiConfig'
 typeconf 'mugen::SkillHurtConfig'
     .custom_sol_constructor {
         '"SkillHurtConfig", sol::constructors<mugen::SkillHurtConfig()>()'
-    }
-typeconf 'mugen::SkillActivationOverlayConfig'
-    .custom_sol_constructor {
-        '"SkillActivationOverlayConfig", sol::constructors<mugen::SkillActivationOverlayConfig()>()'
     }
 typeconf 'mugen::RoleConfig'
     .custom_sol_constructor {
@@ -543,7 +535,6 @@ typeconf 'mugen::Config'
     .exclude "getAiConfigById"
     .exclude "getSkillAiConfigById"
     .exclude "getSkillHurtConfigById"
-    .exclude "getSkillActivationOverlayById"
     .exclude "getAttributeTemplateConfigById"
     .exclude "getResSoundById"
     .exclude "getSoundUiByViewName"
