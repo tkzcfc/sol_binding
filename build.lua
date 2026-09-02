@@ -309,6 +309,7 @@ typeconf 'mugen::Vector3i'
 -- GameDef enums
 typeconf 'mugen::SlotTriggerFlag'
 typeconf 'mugen::EntityCategory'
+typeconf 'mugen::EntityRoleType'
 typeconf 'mugen::CharacterClass'
 typeconf 'mugen::HitType'
 typeconf 'mugen::FacingDirection'
