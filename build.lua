@@ -174,6 +174,7 @@ olua.AUTO_BUILD = true
 -------------------------------------------------------------------------------
 clang {
     '-DOLUA_DEBUG',
+    '-DOLUA_AUTOCONF',
     '-I' .. ROOT_SOURCE_DIR
 }
 
@@ -189,6 +190,7 @@ api_dir 'autobuild/addons/mugen'
 
 headers [[
 #include "mugen/conf/Config.h"
+#include "mugen/avatar/data/AvatarAssetCache.h"
 ]]
 
 local pattern = {
@@ -296,10 +298,11 @@ typeconf 'mugen::Vector3i'
     .custom_sol_constructor {
         '"Vector3i", sol::constructors<mugen::Vector3i()>()'
     }
--- typeconf 'mugen::DamageBox'
---     .custom_sol_constructor {
---         '"DamageBox", sol::constructors<mugen::DamageBox()>()'
---     }
+typeconf 'mugen::DamageBox'
+    .exclude "overlaps"
+    .custom_sol_constructor {
+        '"DamageBox", sol::constructors<mugen::DamageBox()>()'
+    }
 
 
 -- expr (Config 路径不再依赖，保留需自行加 headers)
@@ -504,6 +507,68 @@ typeconf 'mugen::ItemBaseConfig'
 typeconf 'mugen::ResFashionConfig'
     .custom_sol_constructor {
         '"ResFashionConfig", sol::constructors<mugen::ResFashionConfig()>()'
+    }
+
+typeconf 'mugen::CombatTrackKind'
+typeconf 'mugen::MotionEntryType'
+
+typeconf 'mugen::CombatKey'
+    .custom_sol_constructor {
+        '"CombatKey", sol::constructors<mugen::CombatKey()>()'
+    }
+typeconf 'mugen::CombatTrack'
+    .custom_sol_constructor {
+        '"CombatTrack", sol::constructors<mugen::CombatTrack()>()'
+    }
+typeconf 'mugen::CombatEvent'
+    .custom_sol_constructor {
+        '"CombatEvent", sol::constructors<mugen::CombatEvent()>()'
+    }
+typeconf 'mugen::CombatTimeline'
+    .exclude "boxesAt"
+    .exclude "eventsBetween"
+    .custom_sol_constructor {
+        '"CombatTimeline", sol::constructors<mugen::CombatTimeline()>()'
+    }
+
+typeconf 'mugen::AniFrame'
+    .custom_sol_constructor {
+        '"AniFrame", sol::constructors<mugen::AniFrame()>()'
+    }
+typeconf 'mugen::AniData'
+    .custom_sol_constructor {
+        '"AniData", sol::constructors<mugen::AniData()>()'
+    }
+
+typeconf 'mugen::MotionEntry'
+    .custom_sol_constructor {
+        '"MotionEntry", sol::constructors<mugen::MotionEntry()>()'
+    }
+typeconf 'mugen::MotionDef'
+    .custom_sol_constructor {
+        '"MotionDef", sol::constructors<mugen::MotionDef()>()'
+    }
+typeconf 'mugen::MotionMap'
+    .exclude "findMotion"
+    .exclude "motionAt"
+    .exclude "bindTimelines"
+    .custom_sol_constructor {
+        '"MotionMap", sol::constructors<mugen::MotionMap()>()'
+    }
+
+typeconf 'mugen::AvatarAssetCache'
+    .exclude "destroy"
+    .exclude "destroyInstance"
+    .exclude "getInstance"
+    .custom_sol_constructor {
+        '"AvatarAssetCache", sol::constructors<mugen::AvatarAssetCache()>()'
+    }
+    .custom_sol_function {
+[[
+    "getInstance", []() {
+        return mugen::AvatarAssetCache::getInstance();
+    }
+]]
     }
 
 typeconf 'mugen::Config'
